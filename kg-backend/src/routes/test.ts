@@ -1,9 +1,10 @@
 import Router from "@koa/router";
 
-export class TestApi {
-	constructor(router: Router) {
-		router.get("/test", (ctx) => {
-			ctx.response.status = 200;
-		});
-	}
-}
+const testRouter = new Router()
+
+testRouter.get('/test', (ctx) => {
+  ctx.status = 200;
+})
+
+
+export default testRouter

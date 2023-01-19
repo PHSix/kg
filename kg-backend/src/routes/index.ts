@@ -1,8 +1,10 @@
 import Router from "@koa/router";
-import { TestApi } from "./test";
+import domainRouter from "./domain";
+import testRouter from "./test";
 
-const router = new Router();
+const router = new Router({prefix: '/api'});
 
-new TestApi(router);
+router.use(domainRouter.routes());
+router.use(testRouter.routes());
 
 export default router;
