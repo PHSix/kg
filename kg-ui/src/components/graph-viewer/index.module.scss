@@ -1,0 +1,18 @@
+.container {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  .topPanel {
+    height: 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #D4D4D8;
+    padding: 0 20px;
+
+    .title {
+      font-size: 18px;
+      font-weight: bold;
+    }
+  }
+}
