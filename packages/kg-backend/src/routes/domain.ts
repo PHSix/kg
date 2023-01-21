@@ -12,6 +12,7 @@ domainRouter.get("/domains", async (ctx) => {
     const query = instance.find({});
     const results = await query.exec()
 
+    ctx.status = 200
     ctx.response.body = {
       data: {
         results,
@@ -26,6 +27,7 @@ domainRouter.get("/domains", async (ctx) => {
 // 创建领域
 domainRouter.post('/domain', async (ctx) => {
   ctx.status = 200
+  console.log(ctx.req.body)
   ctx.body = {
     msg: "success"
   }
