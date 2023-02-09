@@ -1,6 +1,5 @@
 import { request } from "../../utils/request";
-import {API} from 'models/apiType'
-import {Domain} from "models";
+import {API, Domain} from 'kg-model'
 
 // 获取所有领域
 export const getDomains = () => {

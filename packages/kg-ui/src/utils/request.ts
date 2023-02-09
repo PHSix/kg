@@ -1,15 +1,15 @@
 import {message} from "antd";
 import { assignIn, cloneDeep, omit } from "lodash-es";
-import { ResponseType } from "models";
+import { ResponseType } from "kg-model";
 
 interface RequestOption {
   method?: "GET" | "POST" | "DELETE" | "PUT";
-  header?: Record<string, string>;
+  headers?: Record<string, string>;
   body?: Record<string, unknown>;
   singal?: AbortSignal;
 }
 
-type SendOption = Required<Pick<RequestOption, "method" | "header">> &
+type SendOption = Required<Pick<RequestOption, "method" | "headers">> &
   Omit<RequestOption, "method" | "header">;
 
 const DEFAULT_OPTION: SendOption = {
@@ -35,8 +35,6 @@ export async function request<ReturnType = any>(
 }> {
   const _option: SendOption = option ? extendOption(option) : DEFAULT_OPTION;
 
-  console.log(_option)
-
   const response = await fetch(url, {
     ...omit(_option, "body"),
     body: _option.method === "GET" ? undefined : JSON.stringify(_option.body || "{}"),
@@ -52,7 +50,7 @@ export async function request<ReturnType = any>(
     }
   }
 
-  if (_option.header["Content-Type"] === "application/json") {
+  if (_option.headers["Content-Type"] === "application/json") {
     return {
       data: (await response.json()) as ResponseType<ReturnType>,
       option: _option,

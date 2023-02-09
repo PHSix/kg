@@ -1,4 +1,6 @@
+import chalk from "chalk";
 import mongoose from "mongoose";
+import log from "src/utils/log";
 import { DomainSchma } from "./schemas/domain";
 
 mongoose.set("strictQuery", false);
@@ -12,6 +14,7 @@ mongoose
     // },
   })
   .then((instance) => {
+    log.info(chalk.bgGreen("connected mongodb service successful"))
     mongooseInstance = instance;
   })
   .catch((err) => console.error(err));
@@ -20,12 +23,12 @@ function getDomain() {
   return mongooseInstance.model("domain", DomainSchma);
 }
 
-function getGraph(graphName: string) {
+function getGraphModel(graphName: string) {
   return mongooseInstance.model(graphName);
 }
 
-function getMongo() {
+function getMongoModel() {
   return [mongooseInstance];
 }
 
-export { getMongo, getDomain, getGraph };
+export { getMongoModel, getDomain, getGraphModel };

@@ -11,7 +11,7 @@ type GraphAttributeRef = {
 };
 
 export const GraphAttribute = forwardRef<GraphAttributeRef>((_, ref) => {
-  const [open, actions] = useBoolean(true);
+  const [open, actions] = useBoolean(false);
 
   useImperativeHandle(ref, () => ({
     editLink() {},

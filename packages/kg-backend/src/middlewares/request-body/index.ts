@@ -3,7 +3,7 @@ import Koa from "koa";
 export const RequestBody = (): Koa.Middleware => {
   return async (ctx, next) => {
     if (
-      ctx.request.header["content-type"] === "application" &&
+      ctx.request.header["content-type"] === "application/json" &&
       ["PUT", "POST"].includes(ctx.request.method.toUpperCase())
     ) {
       const body = await new Promise((resolve) => {
@@ -13,15 +13,19 @@ export const RequestBody = (): Koa.Middleware => {
           d.push(data);
         });
         ctx.req.on("end", () => {
-          console.log(d)
-          resolve(d.join());
+          try {
+            resolve(JSON.parse(d.join()));
+          } catch {
+            resolve(d.join());
+          }
         });
       });
 
-      ctx.req.body = body;
+      (ctx.req as any).body = body;
+    } else {
+      (ctx.req as any).body = {};
     }
-    else {
-      ctx.req.body = {}
-    }
+
+    return next();
   };
 };

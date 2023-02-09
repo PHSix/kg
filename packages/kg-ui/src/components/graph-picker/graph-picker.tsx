@@ -1,8 +1,9 @@
 import { useBoolean, useRequest } from "ahooks";
 import { Form, Input, message, Modal, Spin, Tag } from "antd";
 import { get } from "lodash-es";
-import { Domain } from "models";
-import { FC, useState } from "react";
+import { Domain } from "kg-model";
+import { FC } from "react";
+import { useCurrentDomain } from "../../stores/currentDomain";
 import styles from "./index.module.scss";
 import { getDomains, postDomain } from "./services";
 
@@ -11,8 +12,8 @@ const { TextArea } = Input;
 export const GraphPicker: FC = () => {
   const [modalOpen, { toggle: toggleModal }] = useBoolean();
   const [form] = Form.useForm();
+  const { updateDomain } = useCurrentDomain();
 
-  // const [submiting, setSubmit] = useState(false);
   const [submiting, { toggle: toggleSubmiting }] = useBoolean(false);
 
   const {
@@ -20,10 +21,11 @@ export const GraphPicker: FC = () => {
     data: domains,
     loading,
   } = useRequest(async () => {
-    return getDomains().then((res) => {
-      const _domains = get(res, "data.data.results", []) as Domain[];
-      return _domains;
-    });
+    return Promise.resolve([] as Domain[])
+    // return getDomains().then((res) => {
+    //   const _domains = get(res, "data.data.results", []) as Domain[];
+    //   return _domains;
+    // });
   });
 
   const appendDomain = async () => {
@@ -34,6 +36,8 @@ export const GraphPicker: FC = () => {
       })
       .then(() => {
         toggleModal();
+        toggleSubmiting();
+        form.resetFields();
         return refreshAsync();
       })
       .catch(() => message.error("新增领域失败"))
@@ -48,7 +52,14 @@ export const GraphPicker: FC = () => {
         <div className={styles.tags}>
           {(domains || []).map((domain) => {
             return (
-              <Tag color={"orange"} className={styles.tag}>
+              <Tag
+                color={"orange"}
+                className={styles.tag}
+                key={domain.graphName}
+                onClick={() => {
+                  updateDomain(domain);
+                }}
+              >
                 {domain.name}
               </Tag>
             );
@@ -73,10 +84,14 @@ export const GraphPicker: FC = () => {
         title="新增领域"
       >
         <Form form={form}>
-          <Form.Item label="领域名称">
+          <Form.Item label="领域名称" name="name" rules={[{ required: true }]}>
             <Input placeholder="请输入领域名称"></Input>
           </Form.Item>
-          <Form.Item label="领域描述">
+          <Form.Item
+            label="领域描述"
+            name="description"
+            rules={[{ required: true }]}
+          >
             <TextArea placeholder="请输入领域名称" cols={6}></TextArea>
           </Form.Item>
         </Form>

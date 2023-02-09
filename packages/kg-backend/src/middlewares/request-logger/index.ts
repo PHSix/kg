@@ -1,6 +1,7 @@
 import Koa from "koa";
 import chalk from "chalk";
 import { toString, toUpper } from "lodash";
+import log from "src/utils/log";
 
 interface LoggerParams {
 	method: string;
@@ -43,9 +44,10 @@ const StatusColors: Record<string, string> = {
  * 默认的Logger，打印输出到控制台
  */
 const defaultLogger = (params: LoggerParams) => {
+  
 	const method = toUpper(params.method);
 	const code = toString(params.statusCode);
-	console.log(
+	log.info(
 		` ${chalk.bgHex(MethodColors[method] || "#DC2626")(` ${method} `)}  ${
 			params.url
 		}  ${chalk.bgHex(StatusColors[code.slice(0, 1)] || "#DC2626")(` ${code} `)}`

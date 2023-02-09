@@ -1,12 +1,15 @@
 .wrapper {
   width: 0;
   position: relative;
+  height: 100%;
+
 
   .drawer {
     position: absolute;
     left: 0;
-    top: 50px;
-    height: calc(100% - 58px);
+    top: 8px;
+    // height: calc(100% - 58px);
+    height: calc(100% - 18px);
     width: 20vw;
     transition-property: all;
     transition-duration: 300ms;

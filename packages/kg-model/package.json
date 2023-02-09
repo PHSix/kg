@@ -1,5 +1,5 @@
 {
-  "name": "kg",
+  "name": "kg-model",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -8,8 +8,5 @@
   },
   "keywords": [],
   "author": "",
-  "license": "ISC",
-  "dependencies": {
-    "zod": "^3.20.2"
-  }
+  "license": "ISC"
 }
