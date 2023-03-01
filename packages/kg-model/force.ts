@@ -22,6 +22,8 @@ export const ForceNode = z
   .partial({
     fx: true,
     fy: true,
+    x: true,
+    y: true,
     properties: true,
   });
 

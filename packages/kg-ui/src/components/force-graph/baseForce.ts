@@ -2,10 +2,10 @@ import { merge } from "lodash-es";
 import { defaultForceGraphOptions, ForceGraphOptionsType } from "./type";
 import * as d3 from "d3";
 import styles from "./index.module.scss";
-import {ForceLinkType, ForceNodeType} from "kg-model";
+import { ForceLinkType, ForceNodeType } from "kg-model";
 
 export class BaseForce {
-  public options: Required<ForceGraphOptionsType>;
+  protected options: Required<ForceGraphOptionsType>;
   public nodes: ForceNodeType[];
   public links: ForceLinkType[];
 
@@ -15,7 +15,7 @@ export class BaseForce {
     this.options = merge(options, defaultForceGraphOptions);
   }
 
-  protected generateLink(svg: d3.Selection<SVGSVGElement, any, any, any>) {
+  protected gLink(svg: d3.Selection<SVGSVGElement, any, any, any>) {
     return svg
       .append("g")
       .attr("class", styles["linkGroup"])
@@ -26,14 +26,13 @@ export class BaseForce {
       .selectAll("line")
       .data(this.links)
       .join("line")
-      .on("click", (ev) => {})
       .attr("stroke", (d) => {
         if (d.properties && d.properties.color) return d.properties.color;
         return "#333";
       });
   }
 
-  protected generateLinkText(svg: d3.Selection<SVGSVGElement, any, any, any>) {
+  protected gLinkText(svg: d3.Selection<SVGSVGElement, any, any, any>) {
     return svg
       .append("g")
       .attr("class", styles["linkTextGroup"])
@@ -55,7 +54,7 @@ export class BaseForce {
       });
   }
 
-  protected generateNode(svg: d3.Selection<SVGSVGElement, any, any, any>) {
+  protected gNode(svg: d3.Selection<SVGSVGElement, any, any, any>) {
     return (
       svg
         .append("g")
@@ -64,8 +63,10 @@ export class BaseForce {
         .data(this.nodes)
         .join("circle")
         .attr("r", this.options.nodeRadius)
-        .attr("cx", (d) => d.x)
-        .attr("cy", (d) => d.y)
+        .attr("cx", (d: any) => d.x)
+        .attr("cy", (d: any) => d.y)
+        .attr("stroke-width", 0)
+        // .attr("stroke", "#E11D48")
         .attr("fill", (d: any) => {
           if (d.properties && d.properties.color) {
             return d.properties.color;
@@ -77,33 +78,43 @@ export class BaseForce {
     );
   }
 
-  protected generateNodeText(svg: d3.Selection<SVGSVGElement, any, any, any>) {
-    return svg
-      .append("g")
-      .attr("class", styles["nodeTextGroup"])
-      .attr("fill", "#444")
-      .attr("text-anchor", "middle")
-      .attr("stroke-width", 0.5)
-      .attr("class", styles["nodeText"])
-      .selectAll("text")
-      .data(this.nodes)
-      .join("text")
-      .attr("font-family", "Maple Mono NF")
-      .attr("font-size", 12)
-      .attr("dy", "2.5em")
-      .text((d) => {
-        if (d.properties && d.properties.title) return d.properties.title;
-        return "";
-      });
+  protected gNodeText(svg: d3.Selection<SVGSVGElement, any, any, any>) {
+    return (
+      svg
+        .append("g")
+        .attr("class", styles["nodeTextGroup"])
+        .attr("fill", "#444")
+        .attr("text-anchor", "middle")
+        .attr("stroke-width", 0.5)
+        .attr("class", styles["nodeText"])
+        .selectAll("text")
+        .data(this.nodes)
+        .join("text")
+        // .attr("font-family", "Maple Mono NF")
+        // .attr("font-size", 12)
+        .attr("dy", "2.5em")
+        .text((d) => {
+          if (d.properties && d.properties.title) return d.properties.title;
+          return "";
+        })
+    );
   }
 
-  // node的外框
-  protected generateNodeArc(svg: d3.Selection<SVGSVGElement, any, any, any>) {
-    // const lockArc = d3.arc(
-    //   
-    // ).innerRadius()
-    // d3.arc()
-    // d3.arc()
-    return svg.append("g").attr("class", styles["nodeOutterGroup"]).selectAll("arc").data(this.nodes).join('arc');
+  protected gMarker(svg: d3.Selection<SVGSVGElement, any, any, any>) {
+    //添加一个marker标签来绘制箭头
+    return svg
+      .append("marker")
+      .attr("id", "resolved") //箭头id，用于其他标记进行引用时的url
+      .attr("markerUnits", "userSpaceOnUse") //定义标记的坐标系统，userSpaceOnUse表示按照引用的元件来决定，strokeWidth按照用户单位决定
+      .attr("viewBox", "0 -5 10 10") //坐标系的区域
+      .attr("refX", 30) //箭头坐标
+      .attr("refY", 0)
+      .attr("markerWidth", 12) //标识的大小
+      .attr("markerHeight", 12)
+      .attr("orient", "auto") //绘制方向，可设定为：auto（自动确认方向）和 角度值
+      .attr("stroke-width", 3) //箭头宽度
+      .append("path")
+      .attr("d", "M0,-5L10,0L0,5") //绘制箭头，路径为一个三角形，有疑问参考svg的path http://www.runoob.com/svg/svg-path.html
+      .attr("fill", "#000000"); //箭头颜色
   }
 }

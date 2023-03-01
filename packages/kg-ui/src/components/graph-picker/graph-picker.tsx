@@ -1,14 +1,35 @@
 import { useBoolean, useRequest } from "ahooks";
 import { Form, Input, message, Modal, Spin, Tag } from "antd";
-import { get } from "lodash-es";
-import { Domain } from "kg-model";
-import { FC } from "react";
+import { FC, useState } from "react";
 import { useCurrentDomain } from "../../stores/currentDomain";
 import styles from "./index.module.scss";
-import { getDomains, postDomain } from "./services";
+import { postDomain } from "./services";
+import type { TagProps } from "antd";
+import type { DomainType } from "kg-model";
 
 const { TextArea } = Input;
 
+const HoverTag = function (
+  props: Omit<TagProps, "color" | "onMouseEnter" | "onMouseLeave">
+) {
+  const [color, setColor] = useState("orange");
+  return (
+    <Tag
+      {...props}
+      color={color}
+      onMouseEnter={() => {
+        setColor("green");
+      }}
+      onMouseLeave={() => {
+        setColor("orange");
+      }}
+    ></Tag>
+  );
+};
+
+/*
+ * 图谱选择器
+ * */
 export const GraphPicker: FC = () => {
   const [modalOpen, { toggle: toggleModal }] = useBoolean();
   const [form] = Form.useForm();
@@ -21,7 +42,15 @@ export const GraphPicker: FC = () => {
     data: domains,
     loading,
   } = useRequest(async () => {
-    return Promise.resolve([] as Domain[])
+    return Promise.resolve(
+      ["图谱1", "测试图谱", "内容图谱", "关系图谱"].map<DomainType>((name) => ({
+        name,
+        createAt: new Date(),
+        updateAt: new Date(),
+        description: "",
+        graphName: name,
+      }))
+    );
     // return getDomains().then((res) => {
     //   const _domains = get(res, "data.data.results", []) as Domain[];
     //   return _domains;
@@ -52,8 +81,8 @@ export const GraphPicker: FC = () => {
         <div className={styles.tags}>
           {(domains || []).map((domain) => {
             return (
-              <Tag
-                color={"orange"}
+              <HoverTag
+                // color={"orange"}
                 className={styles.tag}
                 key={domain.graphName}
                 onClick={() => {
@@ -61,7 +90,7 @@ export const GraphPicker: FC = () => {
                 }}
               >
                 {domain.name}
-              </Tag>
+              </HoverTag>
             );
           })}
           <Tag
@@ -70,7 +99,7 @@ export const GraphPicker: FC = () => {
               toggleModal();
             }}
           >
-            添加领域
+            新增图谱
           </Tag>
         </div>
       </Spin>
@@ -81,18 +110,18 @@ export const GraphPicker: FC = () => {
         onCancel={() => {
           toggleModal();
         }}
-        title="新增领域"
+        title="新增图谱"
       >
         <Form form={form}>
-          <Form.Item label="领域名称" name="name" rules={[{ required: true }]}>
-            <Input placeholder="请输入领域名称"></Input>
+          <Form.Item label="图谱名称" name="name" rules={[{ required: true }]}>
+            <Input placeholder="请输入图谱名称"></Input>
           </Form.Item>
           <Form.Item
-            label="领域描述"
+            label="图谱描述"
             name="description"
-            rules={[{ required: true }]}
+            // rules={[{ required: true }]}
           >
-            <TextArea placeholder="请输入领域名称" cols={6}></TextArea>
+            <TextArea placeholder="请输入图谱名称" cols={6}></TextArea>
           </Form.Item>
         </Form>
       </Modal>

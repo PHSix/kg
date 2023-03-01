@@ -1,5 +1,5 @@
 import { request } from "../../utils/request";
-import {API, Domain} from 'kg-model'
+import {API, DomainType} from 'kg-model'
 
 // 获取所有领域
 export const getDomains = () => {
@@ -7,7 +7,7 @@ export const getDomains = () => {
 };
 
 // 创建领域
-export const postDomain = (body: Pick<Domain, 'name' | 'description'>) => {
+export const postDomain = (body: Pick<DomainType, 'name' | 'description'>) => {
   return request("/api/domain", { method: "POST", body });
 };
 

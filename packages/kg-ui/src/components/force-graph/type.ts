@@ -6,6 +6,10 @@ export interface DataType {
   links: ForceLinkType[];
 }
 
+export interface ForceRef {
+  appendNode: (node: ForceNodeType) => void;
+}
+
 export type Props = Partial<DataType> & {};
 
 export type InstanceType = {
@@ -23,7 +27,7 @@ export const ForceGraphOptions = z
 
     nodeTextColor: z.string(),
     nodeRadius: z.number(),
-    nodeArcColor: z.string(), // 单击或双击时外框颜色
+    nodeSelectColor: z.string(), // 单击时外框颜色
   })
   .partial();
 
@@ -38,5 +42,5 @@ export const defaultForceGraphOptions: Required<ForceGraphOptionsType> = {
 
   nodeRadius: 20,
   nodeTextColor: "#444",
-  nodeArcColor: "#4ADE80",
+  nodeSelectColor: "#4ADE80",
 };

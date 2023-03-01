@@ -1,20 +1,27 @@
 import { ForceLinkRuntimeType, ForceNodeRuntimeType } from "kg-model";
 
+/*
+ * handle force graph native dom event.
+ * */
 export class ForceHandler {
   event = {
-    nodeClick: (() => {}) as any,
+    nodeClick: ((nodeData: ForceNodeRuntimeType, ev: MouseEvent) => {
+      nodeData.focus = !nodeData.focus
+    }) as any,
     linkClick: (() => {}) as any,
     nodeDoubleClick: (() => {}) as any,
     linkDoubleClick: (() => {}) as any,
   };
 
-  // 默认事件发生会调用，不会随着event变量的修改而阻止，默认为展现出选中效果
-  defaultHandler = {
-    nodeClick: () => {},
-    linkClick: () => {},
-  };
-
   constructor() {}
+
+  emit(ev: "nodeClick" | "nodeDoubleClick", d: any, sourceEv: MouseEvent ) {
+    if (ev === "nodeClick") {
+      this.event.nodeClick(d, sourceEv)
+    }else if (ev === "nodeDoubleClick") {
+      this.event.nodeDoubleClick(d, sourceEv)
+    }
+  }
 
   onNodeClick(fn: (nodeData: ForceNodeRuntimeType, ev: MouseEvent) => unknown) {
     this.event.nodeClick = fn;

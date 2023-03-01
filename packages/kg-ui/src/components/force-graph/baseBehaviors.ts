@@ -3,31 +3,28 @@ import * as d3 from "d3";
 /*
  * 力向图拖拽
  * */
-export function forceDrag(simulation: any, zoomRef: { k: number }) {
+export function forceDrag(simulation: any) {
   const dragstarted = (event: any) => {
     if (!event.active) simulation.alphaTarget(0.3).restart();
-    // const scale = zoomRef.k;
-    const scale = 1;
     const fx = event.x;
     const fy = event.y;
-    event.subject.fx = fx / scale;
-    event.subject.fy = fy / scale;
+    event.subject.fx = fx;
+    event.subject.fy = fy;
+    // prevent event popup, because event popup will emit the dragged callback of zoom behavior.
+    event.sourceEvent.stopPropagation();
   };
 
   const dragged = (event: any) => {
-    const scale = zoomRef.k;
-    event.subject.x = event.x / scale;
-    event.subject.y = event.y / scale;
-    event.subject.fx = event.x / scale;
-    event.subject.fy = event.y / scale;
+    event.subject.x = event.x ;
+    event.subject.y = event.y ;
+    event.subject.fx = event.x ;
+    event.subject.fy = event.y ;
   };
 
   const dragended = (event: any) => {
     if (!event.active) simulation.alphaTarget(0);
-    const scale = zoomRef.k;
-    // const scale = 1;
-    event.subject.x = event.x / scale;
-    event.subject.y = event.y / scale;
+    event.subject.x = event.x ;
+    event.subject.y = event.y ;
     event.subject.fx = null;
     event.subject.fy = null;
   };

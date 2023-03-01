@@ -1,6 +1,6 @@
-import { Domain } from "./index";
+import { DomainType } from "./index";
 export module API {
   export interface GetDomains {
-    results: Domain[];
+    results: DomainType[];
   }
 }

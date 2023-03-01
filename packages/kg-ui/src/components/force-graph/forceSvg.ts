@@ -5,25 +5,22 @@ import { BaseForce } from "./baseForce";
 import { forceDrag } from "./baseBehaviors";
 import { ForceHandler } from "./forceHandler";
 
-export class ForceClass extends BaseForce {
+export class ForceSvg extends BaseForce {
   public handler = new ForceHandler();
 
-  // nodes: ForceNodeType[];
-  // links: ForceLinkType[];
+  // @ts-ignore
   private simulation: InstanceType["simulation"];
+  private forceLink: d3.ForceLink<d3.SimulationNodeDatum, any> = null!;
   private svg?: d3.Selection<SVGSVGElement, unknown, null, undefined>;
 
+  private marker?: d3.Selection<SVGSVGElement, any, any, any>
   private link?: d3.Selection<d3.BaseType, any, any, any>;
   private node?: d3.Selection<d3.BaseType, any, any, any>;
   private linkText?: d3.Selection<d3.BaseType, any, any, any>;
   private nodeText?: d3.Selection<d3.BaseType, any, any, any>;
 
-  private zoomScale = { x: 0, y: 0, k: 1 };
-
   constructor(data: any, options: ForceGraphOptionsType) {
     super(data, options);
-    this.simulation = d3.forceSimulation(this.nodes) as any;
-    this.simulation.stop();
 
     this.prepare();
   }
@@ -32,10 +29,12 @@ export class ForceClass extends BaseForce {
    * 预准备，建立模拟力模型
    * */
   private prepare() {
+    this.simulation = d3.forceSimulation(this.nodes) as any;
+    this.simulation.stop();
     const N = d3.map(this.nodes, (d) => d.id);
-    const forceLink = d3.forceLink(this.links).id(({ index: i }: any) => N[i]);
+    this.forceLink = d3.forceLink(this.links).id(({ index: i }: any) => N[i]);
     this.simulation = this.simulation
-      .force("link", forceLink.distance(200))
+      .force("link", this.forceLink.distance(200))
       .force("charge", d3.forceManyBody().strength(-600))
       .force("x", d3.forceX())
       .force("y", d3.forceY());
@@ -45,7 +44,7 @@ export class ForceClass extends BaseForce {
     this.simulation.restart();
   }
 
-  mountContainer(selector: string | HTMLElement) {
+  public mountContainer(selector: string | HTMLElement) {
     const wrapper: d3.Selection<HTMLElement, any, any, any> =
       // @ts-ignore
       d3.select(selector);
@@ -63,49 +62,62 @@ export class ForceClass extends BaseForce {
         "max-width: 100%; height: auto; height: intrinsic;border: 1px solid #aaa;"
       );
 
-    this.svg.call(
-      d3
-        .zoom()
-        .extent([
-          [0, 0],
-          [width, height],
-        ])
-        .scaleExtent([0.5, 8])
-        .on("zoom", this.zoomed) as any
-    );
+    this.svg
+      .call(
+        d3
+          .zoom()
+          .extent([
+            [0, 0],
+            [width, height],
+          ])
+          .scaleExtent([0.5, 8])
+          .on("zoom", this.zoomed) as any
+      )
+      .on("dblclick.zoom", null);
 
-    this._generateEleSelections();
+    this._gEles();
     this._eventBind();
     this._bindEleBehavior();
   }
 
-  update(nodes: ForceNodeType[], links: ForceLinkType[]) {
-    this.nodes = nodes;
-    this.links = links;
+  private destory() {
+    this.node?.remove();
+    this.nodeText?.remove();
+    this.link?.remove();
+    this.linkText?.remove();
+    ['node', 'nodeText', 'link', 'linkText'].map(attr => {
+      ((this as any)[attr]) = undefined
+    })
+  }
+
+  public refresh() {
+    this.simulation.nodes(this.nodes);
+    this.forceLink.links(this.links);
+    this._gEles();
+    this._eventBind();
+    this._bindEleBehavior();
+  }
+
+  public update(nodes: ForceNodeType[], links: ForceLinkType[]) {
     if (this.nodes !== nodes || links !== this.links) {
-      this._generateEleSelections();
-      this._eventBind();
-      this._bindEleBehavior();
+      this.nodes = nodes;
+      this.links = links;
+      this.refresh();
     }
   }
 
-  umount() {
+  public umount() {
     this.svg?.remove();
     this.simulation.stop();
   }
 
   private zoomed = (ev: any) => {
-    // zoomScale 通过ref的形式传给了drag函数，所以这里不行直接修改引用
-    this.zoomScale.x = ev.transform.x;
-    this.zoomScale.y = ev.transform.y;
-    this.zoomScale.k = ev.transform.k;
-
-    this.link?.attr("transform", ev.transform);
-    this.node?.attr("transform", ev.transform);
-    this.nodeText?.attr("transform", ev.transform);
-    this.linkText?.attr("transform", ev.transform);
+    this.svg?.selectAll("g").attr("transform", ev.transform);
   };
 
+  /*
+   * refresh render method.
+   * */
   private ticked = () => {
     this.link &&
       this.link
@@ -114,7 +126,11 @@ export class ForceClass extends BaseForce {
         .attr("x2", (d) => d.target.x)
         .attr("y2", (d) => d.target.y);
 
-    this.node && this.node.attr("cx", (d) => d.x).attr("cy", (d) => d.y);
+    this.node &&
+      this.node
+        .attr("cx", (d) => d.x)
+        .attr("cy", (d) => d.y)
+        .style("stroke", this.options.nodeSelectColor);
 
     this.nodeText && this.nodeText.attr("x", (d) => d.x).attr("y", (d) => d.y);
 
@@ -133,22 +149,42 @@ export class ForceClass extends BaseForce {
   };
 
   private _bindEleBehavior() {
-    this.node?.call(forceDrag(this.simulation, this.zoomScale) as any);
+    this.node?.call(forceDrag(this.simulation) as any);
   }
 
+  /*
+   * bind click and double click event.
+   * */
   private _eventBind() {
-    this.node?.on("click", (ev: any, data: any) => {});
+    const that = this;
+    this.node?.on("click", function (ev: any, d: any) {
+      that.handler.emit("nodeClick", d, ev);
+
+      that.node?.style("stroke-width", 0);
+      d3.select(this).style("stroke-width", 4);
+    });
+
+    this.node?.on("dblclick", function (ev: any, d: any) {
+      that.handler.emit("nodeDoubleClick", d, ev);
+
+      that.node?.style("stroke-width", 0);
+      // d3.select(this)
+    });
   }
 
-  private _generateEleSelections() {
+  private _gEles() {
     if (this.svg) {
-      this.link = this.generateLink(this.svg);
+      this.link?.remove();
+      this.node?.remove();
+      this.nodeText?.remove();
+      this.linkText?.remove();
 
-      this.node = this.generateNode(this.svg);
-
-      this.nodeText = this.generateNodeText(this.svg);
-
-      this.linkText = this.generateLinkText(this.svg);
+      this.marker = this.gMarker(this.svg) as any
+      this.link = this.gLink(this.svg);
+      this.link.attr("marker-end", "url(#resolved)");
+      this.node = this.gNode(this.svg);
+      this.nodeText = this.gNodeText(this.svg);
+      this.linkText = this.gLinkText(this.svg);
     }
   }
 }
