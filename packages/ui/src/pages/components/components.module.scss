@@ -1,0 +1,12 @@
+.searchInput {
+  width: 300px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: #aaa;
+
+  &:hover{
+    color: #aaa !important;
+    border-color: #d9d9d9 !important;
+  }
+}

@@ -1,0 +1,51 @@
+.indexContainer {
+  height: 100%;
+  width: 100%;
+  display: flex;
+  overflow: hidden;
+
+  .panel {
+    width: 40px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0px 0 2px #999;
+
+    .iconContainer {
+      padding: 10px;
+      border-radius: 4px;
+      cursor: pointer;
+      &:hover {
+        background-color: #eee;
+      }
+    }
+
+    .disableIcon {
+      cursor: not-allowed;
+    }
+  }
+
+  .viewContainer {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+
+    .searchHeader {
+      width: 100%;
+      height: 50px;
+      box-shadow: -2px 0 2px #999;
+      display: flex;
+      flex-direction: row;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .forceWrapper {
+      flex-grow: 1;
+      width: 100%;
+      color: #555;
+    }
+  }
+}
