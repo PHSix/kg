@@ -14,13 +14,13 @@ export const CreateOver: FC<PropsWithChildren<{}>> = ({ children }) => {
   );
   return (
     <Popover title="新增" content={content} placement="left">
-      <div
+      <span
         onClick={() => {
           setClicked(!clicked);
         }}
       >
         {children}
-      </div>
+      </span>
     </Popover>
   );
 };

@@ -5,7 +5,6 @@ import { IndexPage } from "./pages";
 function App() {
   return (
     <div className="App">
-      {/* <Force></Force> */}
       <BrowserRouter>
         <Routes>
           <Route index element={<IndexPage />}></Route>

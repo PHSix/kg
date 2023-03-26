@@ -40,6 +40,15 @@
       flex-direction: row;
       justify-content: center;
       align-items: center;
+      position: relative;
+      .graphName {
+        position: absolute;
+        left: 20px;
+        top: 10px;
+        line-height: 27px;
+        font-size: 23px;
+        font-weight: 600;
+      }
     }
 
     .forceWrapper {

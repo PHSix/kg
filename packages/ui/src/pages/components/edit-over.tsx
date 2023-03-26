@@ -19,13 +19,13 @@ export const EditOver: FC<PropsWithChildren<{}>> = ({ children }) => {
       placement="left"
       open={clicked}
     >
-      <div
+      <span
         onClick={() => {
           setClicked(!clicked);
         }}
       >
         {children}
-      </div>
+      </span>
     </Popover>
   );
 };
