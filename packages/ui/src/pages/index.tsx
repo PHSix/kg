@@ -9,12 +9,13 @@ import React, { useRef } from "react";
 import { KBarProvider } from "kbar";
 
 import styles from "./index.module.scss";
-import Force from "../force/force";
 import { EditOver } from "./components/edit-over";
 import { CreateOver } from "./components/create-over";
 import { SearchBar } from "./components/search-bar";
 import DomainSelector from "./components/domain-selector";
 import domainStore from "../stores/domain";
+import ForceGraph from "../forceGraph";
+import miserables from "../stores/miserables";
 
 export const IndexPage = () => {
   const barRef = useRef<{
@@ -40,7 +41,38 @@ export const IndexPage = () => {
             <SearchBar ref={barRef}></SearchBar>
           </div>
           <div className={styles.forceWrapper}>
-            <Force></Force>
+            <ForceGraph
+              nodes={miserables.nodes}
+              links={miserables.links}
+              // {...{
+              //   nodes: [
+              //     {
+              //       id: "first Node",
+              //       properties: {
+              //         title: "NODE 1",
+              //         color: "#A855F7",
+              //       },
+              //     },
+              //     {
+              //       id: "Second Node",
+              //       properties: {
+              //         title: "NODE 2",
+              //       },
+              //     },
+              //   ],
+              //   links: [
+              //     {
+              //       source: "first Node",
+              //       target: "Second Node",
+              //       properties: {
+              //         color: "#22C55E",
+              //         title: "relationship 1",
+              //       },
+              //     },
+              //   ],
+              // }}
+            ></ForceGraph>
+            {/* <Force></Force> */}
           </div>
         </section>
         <section className={styles.panel}>

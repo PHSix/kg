@@ -18,6 +18,7 @@ export const ForceNode = z
     fy: z.number().nullable(),
     id: z.string(),
     properties: Properties,
+    group: z.unknown(),
   })
   .partial({
     fx: true,
@@ -25,6 +26,7 @@ export const ForceNode = z
     x: true,
     y: true,
     properties: true,
+    group: true,
   });
 
 export type ForceNodeType = z.infer<typeof ForceNode>;
