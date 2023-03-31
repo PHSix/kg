@@ -49,6 +49,24 @@
         font-size: 23px;
         font-weight: 600;
       }
+
+      .settingButton {
+        position: absolute;
+        right: 20px;
+        top: 0;
+        height: 50px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        .settingOutline {
+          border-radius: 3px;
+          padding: 5px;
+          cursor: pointer;
+          &:hover {
+            background-color: #eee;
+          }
+        }
+      }
     }
 
     .forceWrapper {

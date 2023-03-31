@@ -5,6 +5,8 @@ import styles from "./styles.module.scss";
 import Nodes from "./Nodes";
 import Links from "./Links";
 import NodeLabels from "./NodeLabels";
+import Provider from "./Provider";
+import forceStore from "../stores/force";
 
 const ForceGraph: FC<{
   nodes: ForceNodeType[];
@@ -12,6 +14,14 @@ const ForceGraph: FC<{
 }> = ({ nodes, links }) => {
   const simulationRef = useRef(d3.forceSimulation());
   const svgRef = useRef<SVGSVGElement>(null);
+  const { selectBase } = forceStore;
+  const selectRef = useRef<ForceNodeType | ForceLinkType>();
+
+  // prevent proxy value cause error
+  useEffect(() => {
+    selectRef.current = selectBase;
+  }, [selectBase]);
+
   const ticked = () => {
     const node = d3.selectAll(".force-node");
     const link = d3.selectAll(".force-link");
@@ -36,10 +46,17 @@ const ForceGraph: FC<{
       })
       .attr("cy", function (d: any) {
         return d.y;
+      })
+      .attr("stroke", (d: any) => {
+        if (d === selectRef.current) {
+          return "rgba(190,56,93,.6)";
+        }
+        return "#fff";
       });
 
     nodeLabel.attr("x", (d: any) => d.x).attr("y", (d: any) => d.y);
   };
+
   const updateState = () => {
     const simulation = simulationRef.current;
     // const N = d3.map(nodes, (d) => d.id);
@@ -96,15 +113,24 @@ const ForceGraph: FC<{
     updateState();
   }, [nodes, links]);
 
+  const select = (base: ForceNodeType | ForceLinkType) => {
+    selectRef.current = base;
+  };
 
   return (
-    <div className={styles.forceWrapper}>
-      <svg ref={svgRef} className={styles.svgContainer}>
-        <Links data={links}></Links>
-        <Nodes simulation={simulationRef.current} data={nodes}></Nodes>
-        <NodeLabels data={nodes} />
-      </svg>
-    </div>
+    <Provider
+      value={{
+        select,
+      }}
+    >
+      <div className={styles.forceWrapper}>
+        <svg ref={svgRef} className={styles.svgContainer}>
+          <Links data={links}></Links>
+          <Nodes simulation={simulationRef.current} data={nodes}></Nodes>
+          <NodeLabels data={nodes} />
+        </svg>
+      </div>
+    </Provider>
   );
 };
 

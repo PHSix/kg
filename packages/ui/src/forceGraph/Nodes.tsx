@@ -1,8 +1,9 @@
-import { FC, useEffect, useMemo } from "react";
+import { FC, useContext, useEffect, useMemo } from "react";
 import cs from "classnames";
 import * as d3 from "d3";
 import { ForceNodeType } from "@model";
 import styles from "./styles.module.scss";
+import { forceContext } from "./Provider";
 
 const RADIUS = 10;
 
@@ -20,6 +21,7 @@ const Nodes: FC<{
       }, new Map()),
     [data]
   );
+  const { select } = useContext(forceContext);
   useEffect(() => {
     // const simulation = this.props.simulation;
     const dragstarted = (event: any) => {
@@ -56,6 +58,9 @@ const Nodes: FC<{
     );
 
     node.data(data);
+    node.on("click", (_, d: any) => {
+      select(d);
+    });
   }, [data]);
 
   return (

@@ -4,6 +4,7 @@ import {
   PlusSquareOutlined,
   EditOutlined,
   DeleteOutlined,
+  SettingOutlined,
 } from "@ant-design/icons";
 import React, { useRef } from "react";
 import { KBarProvider } from "kbar";
@@ -16,6 +17,8 @@ import DomainSelector from "./components/domain-selector";
 import domainStore from "../stores/domain";
 import ForceGraph from "../forceGraph";
 import miserables from "../stores/miserables";
+import settingStore from "../stores/settting";
+import SettingDrawer from "./components/setting-drawer";
 
 export const IndexPage = () => {
   const barRef = useRef<{
@@ -39,40 +42,22 @@ export const IndexPage = () => {
           <div className={styles.searchHeader}>
             <span className={styles.graphName}>Current Graph: {graphName}</span>
             <SearchBar ref={barRef}></SearchBar>
+            <div className={styles.settingButton}>
+              <span
+                className={styles.settingOutline}
+                onClick={() => {
+                  settingStore.drawerOpen = true;
+                }}
+              >
+                <SettingOutlined />
+              </span>
+            </div>
           </div>
           <div className={styles.forceWrapper}>
             <ForceGraph
               nodes={miserables.nodes}
               links={miserables.links}
-              // {...{
-              //   nodes: [
-              //     {
-              //       id: "first Node",
-              //       properties: {
-              //         title: "NODE 1",
-              //         color: "#A855F7",
-              //       },
-              //     },
-              //     {
-              //       id: "Second Node",
-              //       properties: {
-              //         title: "NODE 2",
-              //       },
-              //     },
-              //   ],
-              //   links: [
-              //     {
-              //       source: "first Node",
-              //       target: "Second Node",
-              //       properties: {
-              //         color: "#22C55E",
-              //         title: "relationship 1",
-              //       },
-              //     },
-              //   ],
-              // }}
             ></ForceGraph>
-            {/* <Force></Force> */}
           </div>
         </section>
         <section className={styles.panel}>
@@ -116,6 +101,7 @@ export const IndexPage = () => {
           </Space>
         </section>
       </main>
+      <SettingDrawer />
     </KBarProvider>
   );
 };
