@@ -1,6 +1,6 @@
 import { Drawer } from "antd";
 import { FC } from "react";
-import settingStore from "../../stores/settting";
+import settingStore from "../../stores/setting";
 
 const SettingDrawer: FC = () => {
   const { drawerOpen } = settingStore;
@@ -10,11 +10,10 @@ const SettingDrawer: FC = () => {
       onClose={() => {
         settingStore.drawerOpen = false;
       }}
-      placement='right'
-      title={'Settings'}
+      placement="right"
+      title={"Settings"}
     >
-      <section>
-      </section>
+      <section></section>
     </Drawer>
   );
 };

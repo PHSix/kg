@@ -70,9 +70,17 @@
     }
 
     .forceWrapper {
-      flex-grow: 1;
-      width: 100%;
+      height: calc(100% - 52px);
+      // flex-grow: 1;
+      width: calc(100% - 2px);
+      box-sizing: border-box;
       color: #555;
+      border-top: 1px solid #eee;
+
+      // * {
+      //   height: 100%;
+      //   width: 100%;
+      // }
     }
   }
 }

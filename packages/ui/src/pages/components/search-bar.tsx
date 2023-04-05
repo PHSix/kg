@@ -1,6 +1,6 @@
 import { Button, Spin } from "antd";
 import { SearchOutlined } from "@ant-design/icons";
-import { forwardRef, useImperativeHandle } from "react";
+import { forwardRef, useImperativeHandle, useMemo } from "react";
 import { useRequest } from "ahooks";
 import {
   KBarPortal,
@@ -13,9 +13,10 @@ import {
   Action,
 } from "kbar";
 import styles from "./components.module.scss";
-import domainStore from "../../stores/domain";
+import graphStore from "../../stores/graph";
 import request from "../../utils/request";
 import { useActions } from "./useActions";
+import { getNode } from "../../api/node";
 
 export const SearchBar = forwardRef<{
   setOnOpen: () => void;
@@ -24,9 +25,17 @@ export const SearchBar = forwardRef<{
     searchValue: state.searchQuery,
   }));
 
-  const { graphName } = domainStore;
+  const { graphName } = graphStore;
+
   let wrapper = {
     clear: () => {},
+  };
+
+  const getNodeDomain = (graph: string, id?: string) => {
+    return getNode(graph, id).then((response) => {
+      graphStore.nodes = response.data.data.nodes;
+      graphStore.links = response.data.data.links;
+    });
   };
 
   const {
@@ -37,26 +46,33 @@ export const SearchBar = forwardRef<{
     async () => {
       if (!graphName) return [];
       try {
-        const repsonse = await request.get("/api/domain/node", {
+        const response = await request.get("/api/graph/node", {
           params: {
             graph: graphName,
           },
         });
-        const data: any[] = repsonse.data.data;
+        const data: any[] = response.data.data;
 
         wrapper.clear();
 
         return data
-          .map((record) => ({
-            name: record.properties.name,
-            id: record.id,
-            perform: () => {},
-          } as Action))
+          .map(
+            (record) =>
+              ({
+                name: record.properties.name,
+                id: record.id,
+                perform: () => {
+                  getNodeDomain(graphName, record.id);
+                },
+              } as Action)
+          )
           .concat({
             name: "The Whole Graph",
             id: "the_whole_graph",
-            perform: () => {},
-            priority: 999
+            perform: () => {
+              getNodeDomain(graphName);
+            },
+            priority: 999,
           });
       } catch (err) {
         console.error(err);
@@ -82,6 +98,7 @@ export const SearchBar = forwardRef<{
           query.toggle();
           refresh();
         }}
+        disabled={!graphName}
       >
         <SearchOutlined />
         Press `cmd + k` to start search node
@@ -91,7 +108,7 @@ export const SearchBar = forwardRef<{
           <KBarAnimator className={styles.kbarAnimator}>
             <KBarSearch
               className={styles.kbarSearchInput}
-              defaultPlaceholder="Type domain node for search"
+              defaultPlaceholder="Type graph's node for search"
             />
             {loading || !_actions ? <LoadingAnimate /> : <SearchResult />}
             <KBarBottom />

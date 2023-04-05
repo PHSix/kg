@@ -5,6 +5,7 @@ export const Properties = z
     title: z.string(),
     description: z.string(),
     color: z.string(),
+    group: z.unknown()
   })
   .partial();
 
@@ -18,7 +19,7 @@ export const ForceNode = z
     fy: z.number().nullable(),
     id: z.string(),
     properties: Properties,
-    group: z.unknown(),
+    // group: z.unknown(),
   })
   .partial({
     fx: true,
@@ -26,7 +27,7 @@ export const ForceNode = z
     x: true,
     y: true,
     properties: true,
-    group: true,
+    // group: true,
   });
 
 export type ForceNodeType = z.infer<typeof ForceNode>;
@@ -38,12 +39,14 @@ export interface ForceNodeRuntimeType extends ForceNodeType {
 
 export const ForceLink = z
   .object({
+    id: z.string(),
     source: z.number().or(z.string()),
     target: z.number().or(z.string()),
     properties: Properties,
   })
   .partial({
     properties: true,
+    id: true
   });
 
 export type ForceLinkType = z.infer<typeof ForceLink>;

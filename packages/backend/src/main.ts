@@ -2,7 +2,7 @@ import express from "express";
 import morgan from "morgan";
 import {mongoInitial} from "./db/mongo";
 import indexRouter from "./routes";
-import { neo4jInitial } from "./utils/neo4j";
+import { neo4jInitial } from "./db/neo4j";
 
 (async () => {
   await mongoInitial()

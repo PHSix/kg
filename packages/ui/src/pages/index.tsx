@@ -6,25 +6,57 @@ import {
   DeleteOutlined,
   SettingOutlined,
 } from "@ant-design/icons";
-import React, { useRef } from "react";
+import React, { useMemo, useRef } from "react";
 import { KBarProvider } from "kbar";
+import { Force, IGraphProps } from "@bixi-design/graphs";
 
 import styles from "./index.module.scss";
 import { EditOver } from "./components/edit-over";
 import { CreateOver } from "./components/create-over";
 import { SearchBar } from "./components/search-bar";
-import DomainSelector from "./components/domain-selector";
-import domainStore from "../stores/domain";
-import ForceGraph from "../forceGraph";
-import miserables from "../stores/miserables";
-import settingStore from "../stores/settting";
+import GraphSelector from "./components/graph-selector";
+import graphStore from "../stores/graph";
+import settingStore from "../stores/setting";
 import SettingDrawer from "./components/setting-drawer";
+
+const NODE_STATE_STYLES = {
+  normal: {
+    distance: 2,
+    label: {
+      show: true,
+      space: "nowrap",
+      textOffset: "10",
+      rectFillStyle: "rgba(39, 56, 73, 0.8)",
+      textWidth: 80,
+    },
+    shadowBlur: 0,
+  },
+};
 
 export const IndexPage = () => {
   const barRef = useRef<{
     setOnOpen: VoidFunction;
   }>(null);
-  const { graphName } = domainStore;
+  const { graphName, nodes, links } = graphStore;
+  const data = useMemo(
+    () => ({
+      nodes,
+      links,
+    }),
+    [nodes, links]
+  );
+
+  const behavior: Pick<IGraphProps, "onNodeClick" | "onLinkClick"> = {
+    onNodeClick: (n) => {
+      graphStore.currentNode = n;
+      graphStore.currentLink = null;
+    },
+    onLinkClick: (l) => {
+      graphStore.currentLink = l;
+      graphStore.currentNode = null;
+    },
+  };
+
   return (
     <KBarProvider
       actions={[]}
@@ -37,10 +69,12 @@ export const IndexPage = () => {
       }}
     >
       <main className={styles.indexContainer}>
-        <DomainSelector />
+        <GraphSelector />
         <section className={styles.viewContainer}>
           <div className={styles.searchHeader}>
-            <span className={styles.graphName}>Current Graph: {graphName}</span>
+            <span className={styles.graphName}>
+              {graphName ? `Current Graph: ${graphName}` : "unselected"}
+            </span>
             <SearchBar ref={barRef}></SearchBar>
             <div className={styles.settingButton}>
               <span
@@ -54,13 +88,14 @@ export const IndexPage = () => {
             </div>
           </div>
           <div className={styles.forceWrapper}>
-            <ForceGraph
-              nodes={miserables.nodes}
-              links={miserables.links}
-            ></ForceGraph>
+            <Force
+              data={data}
+              nodeStateStyles={NODE_STATE_STYLES}
+              {...behavior}
+            />
           </div>
         </section>
-        <section className={styles.panel}>
+        {/* <section className={styles.panel}>
           <Space direction="vertical" size={"middle"}>
             {[
               {
@@ -79,11 +114,11 @@ export const IndexPage = () => {
                 },
               },
             ].map(({ Icon, color, Over }, index) => {
-              const isable = true;
+              const isAble = true;
               return (
                 <div
                   className={cs(styles.iconContainer, {
-                    [styles.disableIcon]: !isable,
+                    [styles.disableIcon]: !isAble,
                   })}
                   key={index}
                   onClick={() => {}}
@@ -91,7 +126,7 @@ export const IndexPage = () => {
                   <Over>
                     <Icon
                       style={{
-                        color: isable ? color ?? "#111" : "#888",
+                        color: isAble ? color ?? "#111" : "#888",
                       }}
                     ></Icon>
                   </Over>
@@ -99,7 +134,7 @@ export const IndexPage = () => {
               );
             })}
           </Space>
-        </section>
+        </section> */}
       </main>
       <SettingDrawer />
     </KBarProvider>
