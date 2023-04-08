@@ -1,7 +1,7 @@
 import { PlusOutlined } from "@ant-design/icons";
-import { useBoolean, useRequest } from "ahooks";
+import { useBoolean, useRequest, useUpdate, useUpdateEffect } from "ahooks";
 import { Button, Input, Modal, Tag, Form } from "antd";
-import { FC } from "react";
+import { FC, useEffect } from "react";
 import graphStore from "../../stores/graph";
 import request from "../../utils/request";
 import styles from "./components.module.scss";
@@ -9,14 +9,17 @@ import styles from "./components.module.scss";
 const { useForm } = Form;
 
 const GraphSelector: FC = () => {
-  const { graphName } = graphStore;
+  const { graphName, pollGraph: updateGraph } = graphStore;
   const [open, { toggle: toggleOpen }] = useBoolean(false);
   const [confirmLoading, { toggle: toggleLoading }] = useBoolean(false);
-  const { data, refresh } = useRequest(async () => {
+  const { data, refresh, loading } = useRequest(async () => {
     return await request.get("/api/graph").then((res) => {
       return res.data.data as any[];
     });
   });
+  useUpdateEffect(() => {
+    graphStore.isPulling = loading;
+  }, [loading]);
   const [form] = useForm();
   return (
     <section className={styles.selectorContainer}>
@@ -27,7 +30,8 @@ const GraphSelector: FC = () => {
             color={graphName === graph.name ? "red" : "orange"}
             key={graph.name}
             onClick={() => {
-              graphStore.graphName = graph.name;
+              updateGraph(graph.name);
+              // graphStore.graphName = graph.name;
             }}
           >
             {graph.name}

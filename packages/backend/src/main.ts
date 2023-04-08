@@ -1,10 +1,12 @@
 import express from "express";
 import morgan from "morgan";
-import {mongoInitial} from "./db/mongo";
+import { mongoInitial } from "./db/mongo";
 import indexRouter from "./routes";
 import { neo4jInitial } from "./db/neo4j";
 
-(async () => {
+const PORT = 3001;
+
+; (async () => {
   await mongoInitial()
   await neo4jInitial();
   const app = express();
@@ -21,7 +23,7 @@ import { neo4jInitial } from "./db/neo4j";
     res.status(400).send(error);
   });
 
-  app.listen(3000, () => {
-    console.log("server have start on http://localhost:3000");
+  app.listen(PORT, () => {
+    console.log(`server have start on http://localhost:${PORT}`);
   });
 })();

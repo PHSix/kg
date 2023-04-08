@@ -1,17 +1,18 @@
-import mongoose, {connect, Schema, model} from "mongoose";
+import mongoose, { connect, Schema, model } from "mongoose";
 
-mongoose.set('strictQuery', false)
+mongoose.set("strictQuery", false);
 
 export const mongoInitial = async () => {
-  await connect('mongodb://127.0.0.1:27017', {
-    dbName: 'graph',
-    user: 'root',
-    pass: 'example'
-  })
-}
+  await connect("mongodb://127.0.0.1:27017", {
+    dbName: "graph",
+    user: "root",
+    pass: "example",
+  });
+};
 
-const domainSchema = new Schema({
+const graphSchema = new Schema({
   name: String,
-})
+  groups: [String],
+});
 
-export const Domain = model('domain', domainSchema)
+export const Graph = model("graph", graphSchema);

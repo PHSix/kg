@@ -1,5 +1,5 @@
 import cs from "classnames";
-import { Space, Popover } from "antd";
+import { Space, Popover, Spin } from "antd";
 import {
   PlusSquareOutlined,
   EditOutlined,
@@ -11,13 +11,13 @@ import { KBarProvider } from "kbar";
 import { Force, IGraphProps } from "@bixi-design/graphs";
 
 import styles from "./index.module.scss";
-import { EditOver } from "./components/edit-over";
-import { CreateOver } from "./components/create-over";
 import { SearchBar } from "./components/search-bar";
 import GraphSelector from "./components/graph-selector";
 import graphStore from "../stores/graph";
 import settingStore from "../stores/setting";
 import SettingDrawer from "./components/setting-drawer";
+import SuffixHeaderButtons from "./components/suffix-header-buttons";
+import UpdateWindow from "./components/update-window";
 
 const NODE_STATE_STYLES = {
   normal: {
@@ -37,7 +37,7 @@ export const IndexPage = () => {
   const barRef = useRef<{
     setOnOpen: VoidFunction;
   }>(null);
-  const { graphName, nodes, links } = graphStore;
+  const { graphName, nodes, links, isPulling } = graphStore;
   const data = useMemo(
     () => ({
       nodes,
@@ -46,7 +46,10 @@ export const IndexPage = () => {
     [nodes, links]
   );
 
-  const behavior: Pick<IGraphProps, "onNodeClick" | "onLinkClick"> = {
+  const forceBehaviors: Pick<
+    IGraphProps,
+    "onNodeClick" | "onLinkClick" | "onNodeDbClick" | "onLinkDbClick"
+  > = {
     onNodeClick: (n) => {
       graphStore.currentNode = n;
       graphStore.currentLink = null;
@@ -54,6 +57,12 @@ export const IndexPage = () => {
     onLinkClick: (l) => {
       graphStore.currentLink = l;
       graphStore.currentNode = null;
+    },
+    onNodeDbClick: (n) => {
+      graphStore.updateBase = n;
+    },
+    onLinkDbClick: (l) => {
+      graphStore.updateBase = l;
     },
   };
 
@@ -76,67 +85,27 @@ export const IndexPage = () => {
               {graphName ? `Current Graph: ${graphName}` : "unselected"}
             </span>
             <SearchBar ref={barRef}></SearchBar>
-            <div className={styles.settingButton}>
-              <span
-                className={styles.settingOutline}
-                onClick={() => {
-                  settingStore.drawerOpen = true;
-                }}
-              >
-                <SettingOutlined />
-              </span>
+            <SuffixHeaderButtons />
+          </div>
+          {isPulling ? (
+            <Spin
+              spinning={isPulling}
+              className={styles.MaxHW}
+              wrapperClassName={styles.MaxHW}
+            ></Spin>
+          ) : (
+            <div className={styles.forceWrapper}>
+              <Force
+                data={data}
+                nodeStateStyles={NODE_STATE_STYLES}
+                {...forceBehaviors}
+              />
             </div>
-          </div>
-          <div className={styles.forceWrapper}>
-            <Force
-              data={data}
-              nodeStateStyles={NODE_STATE_STYLES}
-              {...behavior}
-            />
-          </div>
+          )}
         </section>
-        {/* <section className={styles.panel}>
-          <Space direction="vertical" size={"middle"}>
-            {[
-              {
-                Icon: PlusSquareOutlined,
-                Over: CreateOver,
-              },
-              {
-                Icon: EditOutlined,
-                Over: EditOver,
-              },
-              {
-                Icon: DeleteOutlined,
-                color: "#DC2626",
-                Over: ({ children }: { children: React.ReactNode }) => {
-                  return <Popover placement="left">{children}</Popover>;
-                },
-              },
-            ].map(({ Icon, color, Over }, index) => {
-              const isAble = true;
-              return (
-                <div
-                  className={cs(styles.iconContainer, {
-                    [styles.disableIcon]: !isAble,
-                  })}
-                  key={index}
-                  onClick={() => {}}
-                >
-                  <Over>
-                    <Icon
-                      style={{
-                        color: isAble ? color ?? "#111" : "#888",
-                      }}
-                    ></Icon>
-                  </Over>
-                </div>
-              );
-            })}
-          </Space>
-        </section> */}
       </main>
       <SettingDrawer />
+      <UpdateWindow />
     </KBarProvider>
   );
 };

@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { Domain } from "../db/mongo";
+import { Graph } from "../db/mongo";
 import z from "zod";
 import { neo4j } from "../db/neo4j";
 
@@ -10,7 +10,7 @@ const graphRouter = Router();
  * */
 graphRouter.get("/", async (_, res) => {
   // const domains: any = []
-  const domains = await Domain.find();
+  const domains = await Graph.find();
   res.send({
     code: 200,
     data: domains,
@@ -25,22 +25,23 @@ const PostBody = z.object({
  * 创建图谱
  * */
 graphRouter.post("/", async (req, res) => {
-  const body = PostBody.parse(req.body);
+  const body: any = PostBody.parse(req.body);
+  body.groups = [];
   if (
     (
-      await Domain.find({
+      await Graph.find({
         name: body.name,
       })
     ).length > 0
   ) {
-    res.status(200).send({
+    res.status(400).send({
       code: 400,
       msg: `The graph named ${body.name} have existd.`,
     });
     return;
   }
-  const _d = new Domain({
-    name: body.name,
+  const _d = new Graph({
+    ...body,
   });
   await new Promise((resovle) => {
     _d.save(() => {
@@ -59,7 +60,7 @@ graphRouter.post("/", async (req, res) => {
  * */
 graphRouter.delete("/:name", async (req, res) => {
   const { name } = req.params;
-  if ((await Domain.find({ name })).length === 0) {
+  if ((await Graph.find({ name })).length === 0) {
     res.send({
       code: 400,
       msg: "The graph is not existd.",
@@ -69,7 +70,7 @@ graphRouter.delete("/:name", async (req, res) => {
   const session = neo4j.session();
   await session.run(`MATCH n(\`${name}\`) DETACH DELETE n`);
 
-  await Domain.deleteOne({
+  await Graph.deleteOne({
     name,
   });
   res.send({
@@ -91,7 +92,7 @@ graphRouter.put("/", async (req, res) => {
   await session.run(
     `MATCH (n:\`${body.oldName}\`) SET n:\`${body.newName}\` REMOVE n:\`${body.oldName}\``
   );
-  await Domain.updateOne({ name: body.oldName }, { name: body.newName });
+  await Graph.updateOne({ name: body.oldName }, { name: body.newName });
   res.send({
     code: 200,
     msg: "success",

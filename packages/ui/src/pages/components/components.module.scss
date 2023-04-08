@@ -100,3 +100,21 @@
   align-items: center;
   min-height: 100px;
 }
+
+.suffixButtons {
+  position: absolute;
+  right: 20px;
+  top: 0;
+  height: 50px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  .buttonOutline {
+    border-radius: 3px;
+    padding: 5px;
+    cursor: pointer;
+    &:hover {
+      background-color: #eee;
+    }
+  }
+}

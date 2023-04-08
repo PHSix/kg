@@ -104,7 +104,11 @@ export const SearchBar = forwardRef<{
         Press `cmd + k` to start search node
       </Button>
       <KBarPortal>
-        <KBarPositioner>
+        <KBarPositioner
+          style={{
+            zIndex: 1000,
+          }}
+        >
           <KBarAnimator className={styles.kbarAnimator}>
             <KBarSearch
               className={styles.kbarSearchInput}
