@@ -1,8 +1,9 @@
 .indexContainer {
-  height: 100%;
-  width: 100%;
+  height: 100vh;
+  max-width: 100vw;
   display: flex;
   overflow: hidden;
+  position: relative;
 
   .panel {
     width: 40px;

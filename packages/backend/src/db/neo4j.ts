@@ -9,19 +9,3 @@ const neo4jInitial = async () => {
   serverInfo = await neo4j.getServerInfo();
 };
 export { neo4jInitial, neo4j, serverInfo };
-// export default neo4j!;
-
-// export default neo4jDriver;
-
-// var sessionInstance: Session
-//
-// function getNeo4jSession(): Session {
-//   if (!sessionInstance) {
-//     sessionInstance = neo4j.session({ database: "kg" });
-//   }
-//   return sessionInstance
-//   // return [sessionInstance];
-// }
-//
-// export { getNeo4jSession };
-

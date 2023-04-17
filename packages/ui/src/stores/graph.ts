@@ -7,27 +7,32 @@ const graphStore = resso<{
   graphName: string | null;
   nodes: INode[];
   links: ILink[];
-  currentNode: INode | null;
-  currentLink: ILink | null;
-  pollGraph: (graph?: string) => void;
+  currentBase: INode | ILink | null;
+  pollGraph: (graph?: string, abortController?: AbortController) => void;
   isPulling: boolean;
   updateBase: INode | ILink | null;
+  lockedNode: INode | null;
+  searchNodeId: string | null;
 }>({
   graphName: null,
   nodes: [],
   links: [],
-  currentNode: null,
-  currentLink: null,
-  pollGraph: (graph) => {
+  currentBase: null,
+  pollGraph: (graph, ab) => {
     const _graph = graph || graphStore.graphName;
+    if (_graph === graph) {
+      graphStore.searchNodeId = null;
+    }
     graphStore.graphName = _graph;
-    getNode(_graph!).then(res => {
+    getNode(_graph!, graphStore.searchNodeId, ab).then((res) => {
       graphStore.links = res.data.data.links;
       graphStore.nodes = res.data.data.nodes;
-    })
+    });
   },
   isPulling: false,
-  updateBase: null
+  updateBase: null,
+  lockedNode: null,
+  searchNodeId: null,
 });
 
 export default graphStore;

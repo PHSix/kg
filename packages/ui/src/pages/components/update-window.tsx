@@ -5,7 +5,6 @@ import { useRequest } from "ahooks";
 import { getNodeGroups, updateNode } from "../../api/node";
 import { DefaultOptionType } from "antd/es/select";
 import { updateLink } from "../../api/link";
-import { pick } from "radash";
 const { useForm } = Form;
 
 const UpdateWindow = () => {
@@ -43,22 +42,30 @@ const UpdateWindow = () => {
 
     form.setFieldsValue({
       name: updateBase?.name,
-      group: updateBase?.source,
+      group: updateBase?.group,
     });
   }, [open, options]);
 
   return (
     <Modal
-      title={`Update ${updateBase?.source ? "link" : "node"} attribute`}
+      title={`修改 ${updateBase?.source ? "关系" : "节点"} 属性`}
       open={open}
       onOk={() => {
         form
           .validateFields()
           .then(async (value) => {
-            if (isNode) {
-              await updateNode(graphName!, value);
-            } else {
-              await updateLink(graphName!, pick(value, ["name"]));
+            if (updateBase) {
+              if (isNode) {
+                await updateNode(graphName!, updateBase.id, value);
+              } else {
+                await updateLink(updateBase.id, {
+                  name: value.name,
+                  from: updateBase.source.id,
+                  to: updateBase.target.id,
+                  id: updateBase.id,
+                  graph: graphName!,
+                });
+              }
             }
           })
           .then(() => {
@@ -72,16 +79,16 @@ const UpdateWindow = () => {
       }}
     >
       <Form form={form} labelCol={{ span: 4 }}>
-        <Form.Item name={"name"} label={"name"} rules={[{ required: true }]}>
-          <Input placeholder="Please input node name" />
+        <Form.Item name={"name"} label={"名字"} rules={[{ required: true }]}>
+          <Input placeholder="请输入名字" />
         </Form.Item>
         {isNode && (
           <Form.Item
             name={"group"}
-            label={"group"}
+            label={"节点分组"}
             rules={[{ required: true }]}
           >
-            <Select placeholder="Please select a group" options={options} />
+            <Select placeholder="请选择一个节点分组" options={options} />
           </Form.Item>
         )}
       </Form>

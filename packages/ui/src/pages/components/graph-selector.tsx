@@ -1,7 +1,7 @@
 import { PlusOutlined } from "@ant-design/icons";
 import { useBoolean, useRequest, useUpdate, useUpdateEffect } from "ahooks";
-import { Button, Input, Modal, Tag, Form } from "antd";
-import { FC, useEffect } from "react";
+import { Button, Input, Modal, Tag, Form, Tooltip } from "antd";
+import { FC, useEffect, useLayoutEffect, useRef } from "react";
 import graphStore from "../../stores/graph";
 import request from "../../utils/request";
 import styles from "./components.module.scss";
@@ -9,18 +9,27 @@ import styles from "./components.module.scss";
 const { useForm } = Form;
 
 const GraphSelector: FC = () => {
-  const { graphName, pollGraph: updateGraph } = graphStore;
+  const { graphName, pollGraph } = graphStore;
   const [open, { toggle: toggleOpen }] = useBoolean(false);
   const [confirmLoading, { toggle: toggleLoading }] = useBoolean(false);
+  const abortRef = useRef(new AbortController());
   const { data, refresh, loading } = useRequest(async () => {
     return await request.get("/api/graph").then((res) => {
-      return res.data.data as any[];
+      return res.data.data as { name: string; groups: string[] }[];
     });
   });
+  useLayoutEffect(() => {
+    if (graphName === null && data && data.length > 0) {
+      pollGraph(data[0].name, abortRef.current);
+    }
+  }, [data, graphName]);
+
   useUpdateEffect(() => {
     graphStore.isPulling = loading;
   }, [loading]);
+
   const [form] = useForm();
+
   return (
     <section className={styles.selectorContainer}>
       {(data || []).map((graph) => {
@@ -30,25 +39,26 @@ const GraphSelector: FC = () => {
             color={graphName === graph.name ? "red" : "orange"}
             key={graph.name}
             onClick={() => {
-              updateGraph(graph.name);
-              // graphStore.graphName = graph.name;
+              pollGraph(graph.name, abortRef.current);
             }}
           >
             {graph.name}
           </Tag>
         );
       })}
-      <Button
-        className={styles.plusButton}
-        onClick={() => {
-          toggleOpen();
-        }}
-      >
-        <PlusOutlined></PlusOutlined>
-      </Button>
+      <Tooltip title="创建新的知识图谱" placement="bottom">
+        <Button
+          className={styles.plusButton}
+          onClick={() => {
+            toggleOpen();
+          }}
+        >
+          <PlusOutlined></PlusOutlined>
+        </Button>
+      </Tooltip>
       <Modal
         closable={false}
-        title={"Create a new Graph"}
+        title={"新增图谱"}
         open={open}
         confirmLoading={confirmLoading}
         onOk={() => {
@@ -72,11 +82,7 @@ const GraphSelector: FC = () => {
         }}
       >
         <Form form={form}>
-          <Form.Item
-            label="Graph Name"
-            rules={[{ required: true }]}
-            name="name"
-          >
+          <Form.Item label="图谱名称" rules={[{ required: true }]} name="name">
             <Input></Input>
           </Form.Item>
         </Form>

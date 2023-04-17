@@ -1,9 +1,9 @@
-import { Drawer, Form, InputNumber } from "antd";
+import { Drawer, Form, InputNumber, Switch } from "antd";
 import { FC } from "react";
 import settingStore from "../../stores/setting";
 
 const SettingDrawer: FC = () => {
-  const { drawerOpen, depth } = settingStore;
+  const { drawerOpen, depth, displayAttribute } = settingStore;
   return (
     <Drawer
       open={drawerOpen}
@@ -11,10 +11,10 @@ const SettingDrawer: FC = () => {
         settingStore.drawerOpen = false;
       }}
       placement="right"
-      title={"Settings"}
+      title={"设置"}
     >
-      <Form labelCol={{ span: 10 }}>
-        <Form.Item label="Node find depth">
+      <Form labelCol={{ span: 14 }}>
+        <Form.Item label="搜索节点的查找最深深度">
           <InputNumber
             value={depth}
             onChange={(e) => {
@@ -23,6 +23,14 @@ const SettingDrawer: FC = () => {
               }
             }}
           ></InputNumber>
+        </Form.Item>
+        <Form.Item label="是否展示属性窗口">
+          <Switch
+            checked={displayAttribute}
+            onClick={() => {
+              settingStore.displayAttribute = !displayAttribute;
+            }}
+          ></Switch>
         </Form.Item>
       </Form>
     </Drawer>

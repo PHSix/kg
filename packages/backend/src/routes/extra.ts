@@ -28,11 +28,11 @@ extraRouter.post("/upload/csv", upload.single("file"), async (req, res) => {
     });
     return;
   }
-  const headerAttrbutes = lines.shift()!.split("\n");
+  const headerAttributes = lines.shift()!.split("\n");
   let sourceIndex = -1,
     targetIndex = -1,
     propertiesIndex = -1;
-  headerAttrbutes.forEach((a, index) => {
+  headerAttributes.forEach((a, index) => {
     switch (a) {
       case "source":
         sourceIndex = index;
@@ -66,5 +66,21 @@ extraRouter.post("/upload/csv", upload.single("file"), async (req, res) => {
     msg: "success",
   });
 });
+
+extraRouter.get('/download/csv', async (req, res) => {
+  const { graph } = req.query;
+  if (!graph) {
+    res.send({
+      code: 400,
+      msg: "without get graph field in request query"
+    })
+    return;
+  }
+
+  res.send({
+    code: 200,
+    data: []
+  })
+})
 
 export default extraRouter;

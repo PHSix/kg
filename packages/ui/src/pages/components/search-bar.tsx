@@ -1,6 +1,6 @@
 import { Button, Spin } from "antd";
 import { SearchOutlined } from "@ant-design/icons";
-import { forwardRef, useImperativeHandle, useMemo } from "react";
+import { forwardRef, useImperativeHandle } from "react";
 import { useRequest } from "ahooks";
 import {
   KBarPortal,
@@ -12,30 +12,21 @@ import {
   useKBar,
   Action,
 } from "kbar";
+
 import styles from "./components.module.scss";
 import graphStore from "../../stores/graph";
 import request from "../../utils/request";
 import { useActions } from "./useActions";
-import { getNode } from "../../api/node";
 
 export const SearchBar = forwardRef<{
   setOnOpen: () => void;
 }>((_, ref) => {
-  const { query, searchValue } = useKBar((state) => ({
-    searchValue: state.searchQuery,
-  }));
+  const { query } = useKBar(() => ({}));
 
-  const { graphName } = graphStore;
+  const { graphName, pollGraph } = graphStore;
 
   let wrapper = {
     clear: () => {},
-  };
-
-  const getNodeDomain = (graph: string, id?: string) => {
-    return getNode(graph, id).then((response) => {
-      graphStore.nodes = response.data.data.nodes;
-      graphStore.links = response.data.data.links;
-    });
   };
 
   const {
@@ -62,15 +53,17 @@ export const SearchBar = forwardRef<{
                 name: record.properties.name,
                 id: record.id,
                 perform: () => {
-                  getNodeDomain(graphName, record.id);
+                  graphStore.searchNodeId = record.id;
+                  pollGraph();
                 },
               } as Action)
           )
           .concat({
-            name: "The Whole Graph",
+            name: "获得整个图谱",
             id: "the_whole_graph",
             perform: () => {
-              getNodeDomain(graphName);
+              graphStore.searchNodeId = null;
+              pollGraph();
             },
             priority: 999,
           });
@@ -101,7 +94,8 @@ export const SearchBar = forwardRef<{
         disabled={!graphName}
       >
         <SearchOutlined />
-        Press `cmd + k` to start search node
+        按下 `cmd + k` 开始搜索图谱节点
+        {/* Press `cmd + k` to start search node */}
       </Button>
       <KBarPortal>
         <KBarPositioner
@@ -112,7 +106,7 @@ export const SearchBar = forwardRef<{
           <KBarAnimator className={styles.kbarAnimator}>
             <KBarSearch
               className={styles.kbarSearchInput}
-              defaultPlaceholder="Type graph's node for search"
+              defaultPlaceholder="输入名字来搜索图谱节点"
             />
             {loading || !_actions ? <LoadingAnimate /> : <SearchResult />}
             <KBarBottom />

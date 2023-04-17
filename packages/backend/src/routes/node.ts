@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { neo4j } from "../db/neo4j";
 import { omit } from "radash";
-import { z } from 'zod'
+import { z } from "zod";
 import validGraph from "../validations/validGraph";
 import transform from "../transformer/transform";
 import { Graph } from "../db/mongo";
@@ -47,14 +47,19 @@ nodeRouter.get("/", async (req, res) => {
 nodeRouter.get("/get", async (req, res) => {
   const { graph } = req.query;
   const session = neo4j.session();
-  const response = await session.run(`MATCH (n:\`${graph}\`),(:\`${graph}\`)-[r]-(:\`${graph}\`) RETURN n,r`)
+  const nodeRes = await session.run(`MATCH (n:\`${graph}\`) RETURN n`);
+  const linkRes = await session.run(
+    `MATCH (:\`${graph}\`)-[r]-(:\`${graph}\`) return r`
+  );
+
   res.send({
     code: 200,
     data: {
-      summary: response.summary,
-      ...transform(response.records)
-    }
-  })
+      summary: nodeRes.summary,
+      linkSummary: linkRes.summary,
+      ...transform([...nodeRes.records, ...linkRes.records]),
+    },
+  });
   session.close();
 });
 
@@ -66,29 +71,28 @@ nodeRouter.get("/get/:id", async (req, res) => {
   const { id } = req.params;
 
   const session = neo4j.session();
-  const cql =
-    `MATCH (n:\`${graph}\`)-[r*..${depth}]-(m:\`${graph}\`) WHERE elementId(n)="${id}" RETURN n,r,m`
-  console.log(cql)
-  const response = await session.run(
-    cql
+  const cql = `MATCH (n:\`${graph}\`)-[r*..${depth}]-(m:\`${graph}\`) WHERE elementId(n)="${id}" RETURN n,r,m`;
+  const reRes = await session.run(cql);
+  const thisRes = await session.run(
+    `MATCH (n:\`${graph}\`) WHERE elementId(n)="${id}" RETURN n`
   );
 
   res.send({
     code: 200,
     data: {
-      query: response.summary.query,
-      ...transform(response.records),
+      summary: reRes.summary,
+      thisSummary: thisRes.summary,
+      ...transform([...thisRes.records, ...reRes.records]),
     },
   });
 
   session.close();
 });
 
-
 const createNodeBody = z.object({
   name: z.string(),
-  group: z.string()
-})
+  group: z.string(),
+});
 /*
  * 创建节点
  * */
@@ -96,13 +100,15 @@ nodeRouter.post("/", async (req, res) => {
   const { graph } = req.query;
   const body = createNodeBody.parse(req.body);
   const session = neo4j.session();
-  const response = await session.run(`CREATE (n:\`${graph}\` { name: "${body.name}", group: "${body.group}" })`)
-  session.close()
+  const response = await session.run(
+    `CREATE (n:\`${graph}\` { name: "${body.name}", group: "${body.group}" })`
+  );
+  session.close();
 
   res.send({
     code: 200,
     msg: "create success",
-    summary: response.summary
+    summary: response.summary,
   });
 });
 
@@ -112,15 +118,22 @@ nodeRouter.post("/", async (req, res) => {
 nodeRouter.delete("/:id", async (req, res) => {
   const { graph } = req.query;
   const { id } = req.params;
-  const session = neo4j.session()
-  const response = await session.run(`MATCH (n:\`${graph}\`) WHERE elementId(n)="${id}" DETACH DELETE n`)
+  const session = neo4j.session();
+  const response = await session.run(
+    `MATCH (n:\`${graph}\`) WHERE elementId(n)="${id}" DETACH DELETE n`
+  );
 
   res.send({
     code: 200,
     msg: "delete success",
-    summary: response.summary
+    summary: response.summary,
   });
-  session.close()
+  session.close();
+});
+
+const PutNodeBody = z.object({
+  name: z.string(),
+  group: z.string(),
 });
 
 /*
@@ -129,9 +142,14 @@ nodeRouter.delete("/:id", async (req, res) => {
 nodeRouter.put("/:id", async (req, res) => {
   const { graph } = req.query;
   const { id } = req.params;
+  const body = PutNodeBody.parse(req.body);
+  const session = neo4j.session();
+  const cql = `MATCH (n:\`${graph}\`) WHERE elementId(n)="${id}" SET n.name="${body.name}",n.group="${body.group}" RETURN n`;
+  const response = await session.run(cql);
   res.send({
     code: 200,
     msg: "update node success",
+    data: response.records,
   });
 });
 
@@ -168,23 +186,26 @@ nodeRouter.post("/group", async (req, res) => {
   let err;
   if (d && !d.groups.includes(group)) {
     try {
-      await Graph.updateOne({ name: graph }, {
-        groups: [...d.groups, group]
-      })
+      await Graph.updateOne(
+        { name: graph },
+        {
+          groups: [...d.groups, group],
+        }
+      );
       res.send({
         code: 200,
-        msg: "success"
-      })
-      return
+        msg: "success",
+      });
+      return;
     } catch (e) {
-      err = e
+      err = e;
     }
   }
 
   res.status(400).send({
     code: 400,
-    msg: err
-  })
+    msg: err,
+  });
 });
 
 export default nodeRouter;

@@ -13,7 +13,7 @@
 
 .selectorContainer {
   position: absolute;
-  left: calc(-300px + 30px);
+  right: calc(-300px + 30px);
   height: 80vh;
   width: 300px;
   top: 10vh;
@@ -36,7 +36,7 @@
   }
 }
 .selectorContainer:hover {
-  left: 7px;
+  right: 7px;
 }
 
 .kbarAnimator {
@@ -116,5 +116,60 @@
     &:hover {
       background-color: #eee;
     }
+  }
+}
+
+.attributeContainer {
+  position: absolute;
+  left: 30px;
+  top: 60px;
+  border-radius: 7px;
+  background-color: #fff;
+  box-shadow: 0 0 4px #aaa;
+  height: 200px;
+  width: 400px;
+  z-index: 1000;
+
+  .attributeHeader {
+    height: 20px;
+    display: flex;
+    justify-content: space-between;
+    padding: 10px;
+    align-items: center;
+    .attributeClose {
+      color: #aaa;
+    }
+  }
+
+  .attributeBody {
+    .attributeRow {
+      padding: 10px 20px;
+      .attributeKey {
+        font-family: sans-serif;
+        // font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+        font-size: 20px;
+        font-weight: 700;
+        line-height: 30px;
+      }
+      .attributeValue {
+        font-family: sans-serif;
+        font-size: 20px;
+        font-weight: 700;
+      }
+    }
+  }
+}
+
+.markdownWrapper {
+  max-height: 600px;
+  min-height: 600px;
+  overflow: auto;
+  &::-webkit-scrollbar {
+    background-color: transparent;
+    width: 0.6rem;
+  }
+  &::-webkit-scrollbar-thumb {
+    background-color: #eee;
+    border-radius: 3px;
   }
 }

@@ -1,22 +1,46 @@
-import { ILink } from "@bixi-design/graphs";
 import request from "../utils/request";
 
-export const deleteLink = (graph: string, linkId: string) => {
+export const deleteLink = (
+  linkId: string,
+  payload: {
+    from: string;
+    to: string;
+    graph: string;
+  }
+) => {
   return request({
-    url: `/api/graph/link/${linkId}`,
-    method: "DELETE",
-    params: { graph },
+    url: `/api/graph/link/delete`,
+    method: "POST",
+    data: {
+      ...payload,
+      id: linkId,
+    },
   });
 };
 
-export const updateLink = (graph: string, payload: { name: string }) => {
+export const updateLink = (
+  id: string,
+  payload: { name: string; from: string; to: string; graph: string, id: string }
+) => {
   const data = {
-    ...payload
+    id,
+    ...payload,
   };
   return request({
-    url: `/api/graph/link`,
+    url: `/api/graph/link/${id}`,
     method: "PUT",
-    params: { graph },
     data,
+  });
+};
+
+export const createLink = (
+  graph: string,
+  payload: { from: string; to: string; name: string }
+) => {
+  return request({
+    url: `/api/graph/link`,
+    method: "POST",
+    params: { graph },
+    data: payload,
   });
 };

@@ -1,23 +1,32 @@
-import { INode } from "@bixi-design/graphs";
 import request from "../utils/request";
+import settingStore from "../stores/setting";
 
 /**
  * 获取节点和所有节点
  */
-export const getNode = (graph: string, nodeId?: string) => {
+export const getNode = (
+  graph: string,
+  nodeId?: string | null,
+  abortController?: AbortController
+) => {
   return request({
     url: nodeId ? `/api/graph/node/get/${nodeId}` : "/api/graph/node/get",
     params: {
       graph,
+      depth: settingStore.depth,
     },
     method: "GET",
+    signal: abortController?.signal,
   });
 };
 
-export const createNode = (graph: string, payload: {
-  name: string
-  group: string
-}) => {
+export const createNode = (
+  graph: string,
+  payload: {
+    name: string;
+    group: string;
+  }
+) => {
   return request({
     url: `/api/graph/node`,
     method: "POST",
@@ -34,12 +43,16 @@ export const deleteNode = (graph: string, nodeId: string) => {
   });
 };
 
-export const updateNode = (graph: string, payload: { name: string, group: string }) => {
+export const updateNode = (
+  graph: string,
+  id: string,
+  payload: { name: string; group: string }
+) => {
   const data = {
     ...payload,
   };
   return request({
-    url: `/api/graph/node`,
+    url: `/api/graph/node/${id}`,
     method: "PUT",
     params: { graph },
     data,
