@@ -11,8 +11,8 @@ importers:
   packages/backend:
     dependencies:
       '@model':
-        specifier: workspace:../kg-model
-        version: link:../kg-model
+        specifier: workspace:../model
+        version: link:../model
       '@types/multer':
         specifier: ^1.4.7
         version: 1.4.7
@@ -51,7 +51,7 @@ importers:
         specifier: ^1.9.4
         version: 1.9.4
 
-  packages/kg-model: {}
+  packages/model: {}
 
   packages/ui:
     dependencies:
@@ -62,8 +62,8 @@ importers:
         specifier: 3.2.0-beta.2
         version: 3.2.0-beta.2(react@18.2.0)
       '@model':
-        specifier: workspace:../kg-model
-        version: link:../kg-model
+        specifier: workspace:../model
+        version: link:../model
       '@types/d3':
         specifier: ^7.4.0
         version: 7.4.0
