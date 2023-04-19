@@ -1,5 +1,7 @@
 import {
   ArrowRightOutlined,
+  BoldOutlined,
+  CloseCircleOutlined,
   DeleteOutlined,
   DownloadOutlined,
   InboxOutlined,
@@ -32,6 +34,8 @@ import settingStore from "../../stores/setting";
 import styles from "./components.module.scss";
 import { deleteLink } from "../../api/link";
 import MarkdownDoc from "./markdown-doc";
+import { forCsv, parseCsv } from "../../utils/csv";
+import { uploadGraph } from "../../api/graph";
 
 const { useForm } = Form;
 const { Dragger } = Upload;
@@ -41,7 +45,8 @@ const SuffixHeaderButtons = () => {
   const [addVisible, { toggle: toggleAdd }] = useBoolean(false);
   const [form] = useForm();
   const [groupForm] = useForm();
-  const { graphName, pollGraph, currentBase } = graphStore;
+  const { graphName, pollGraph, currentBase, lockedNode, nodes, links } =
+    graphStore;
   const [isNode, isLink] = useMemo(() => {
     if (!currentBase) {
       return [false, false];
@@ -57,26 +62,50 @@ const SuffixHeaderButtons = () => {
     () => [
       {
         children: <DownloadOutlined />,
-        onClick: () => {},
+        onClick: () => {
+          const text = forCsv(nodes, links);
+          const blob = new Blob([text], { type: "text/csv;charset=utf-8;" });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          a.setAttribute("href", url);
+          a.setAttribute("download", `${graphName!}.csv`);
+          a.click();
+        },
         disable: !graphName,
         tooltip: "导出图谱",
       },
       {
-        // children: <UploadOutlined />,
         children: <UploadModal />,
         onClick: () => {},
         disable: !graphName,
         tooltip: "上传图谱",
       },
       {
-        children: (
-          <ArrowRightOutlined style={{ color: !isNode ? "#999" : "unset" }} />
-        ),
-        onClick: () => {
-          graphStore.lockedNode = currentBase as any;
-        },
-        disable: !isNode,
-        tooltip: "创建关系",
+        ...(lockedNode
+          ? {
+              children: (
+                <CloseCircleOutlined
+                  style={{ color: !isNode ? "#999" : "unset" }}
+                />
+              ),
+              onClick: () => {
+                graphStore.lockedNode = null;
+              },
+              disable: !isNode,
+              tooltip: "创建关系",
+            }
+          : {
+              children: (
+                <ArrowRightOutlined
+                  style={{ color: !isNode ? "#999" : "unset" }}
+                />
+              ),
+              onClick: () => {
+                graphStore.lockedNode = currentBase as any;
+              },
+              disable: !isNode,
+              tooltip: "取消创建",
+            }),
       },
       {
         children: (
@@ -138,7 +167,7 @@ const SuffixHeaderButtons = () => {
         tooltip: "帮助",
       },
     ],
-    [graphName, isNode, isLink, currentBase]
+    [graphName, isNode, isLink, currentBase, lockedNode, nodes, links]
   );
 
   const fixVisible = (state: boolean) => {
@@ -252,7 +281,6 @@ const SuffixHeaderButtons = () => {
             className={styles.buttonOutline}
             style={{
               cursor: btn.disable ? "not-allowed" : "pointer",
-              // backgroundColor: btn.disable ? "#eee" : "unset",
             }}
             onClick={btn.disable ? undefined : btn.onClick}
           >
@@ -266,27 +294,30 @@ const SuffixHeaderButtons = () => {
 
 const UploadModal = () => {
   const [visible, { toggle }] = useBoolean(false);
+  const { graphName } = graphStore;
   const uploadProps: UploadProps = useMemo(
     () => ({
       name: "file",
       multiple: true,
       action: "https://www.mocky.io/v2/5cc8019d300000980a055e76",
-      onChange(info) {
-        // const { status } = info.file;
-        // if (status !== "uploading") {
-        //   console.log(info.file, info.fileList);
-        // }
-        // if (status === "done") {
-        //   message.success(`${info.file.name} file uploaded successfully.`);
-        // } else if (status === "error") {
-        //   message.error(`${info.file.name} file upload failed.`);
-        // }
+      beforeUpload: (file) => {
+        const reader = new FileReader();
+        reader.readAsText(file);
+
+        reader.onload = () => {
+          const { result } = reader;
+          if (result && typeof result === "string") {
+            // console.log(result);
+            const obj = parseCsv(result);
+            uploadGraph(graphName!, obj).then((res) => {});
+          }
+        };
+        return false;
       },
-      onDrop(e) {
-        // console.log("Dropped files", e.dataTransfer.files);
-      },
+      accept: ".csv",
+      fileList: [],
     }),
-    []
+    [graphName]
   );
   return (
     <>
@@ -308,12 +339,9 @@ const UploadModal = () => {
               <InboxOutlined />
             </p>
             <p className="ant-upload-text">
-              Click or drag file to this area to upload
+              点击选择或者拖拽文件到此区域进行上传
             </p>
-            <p className="ant-upload-hint">
-              Support for a single or bulk upload. Strictly prohibited from
-              uploading company data or other banned files.
-            </p>
+            <p className="ant-upload-hint">支持单个或批量上传。</p>
           </Dragger>
         </div>
       </Modal>

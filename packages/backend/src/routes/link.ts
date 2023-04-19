@@ -2,7 +2,7 @@ import { Router } from "express";
 import { z } from "zod";
 import validGraph from "../validations/validGraph";
 import { neo4j } from "../db/neo4j";
-const LINK_LABEL = "LINK_TO";
+export const LINK_LABEL = "LINK_TO";
 
 const linkRouter = Router();
 

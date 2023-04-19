@@ -1,7 +1,14 @@
-import { Menu, Spin } from "antd";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { Modal, notification, Spin, Form, Input } from "antd";
+import {
+  forwardRef,
+  useEffect,
+  useImperativeHandle,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { KBarProvider } from "kbar";
-import { Force, IGraphProps, INode } from "@bixi-design/graphs";
+import { Force, IGraphProps } from "@bixi-design/graphs";
 
 import styles from "./index.module.scss";
 import { SearchBar } from "./components/search-bar";
@@ -11,7 +18,6 @@ import SettingDrawer from "./components/setting-drawer";
 import SuffixHeaderButtons from "./components/suffix-header-buttons";
 import UpdateWindow from "./components/update-window";
 import { createLink } from "../api/link";
-import { useEventListener, useUpdateEffect } from "ahooks";
 import AttributeWindow from "./components/attribute-window";
 
 const NODE_STATE_STYLES = {
@@ -55,15 +61,26 @@ export const IndexPage = () => {
   > = {
     onNodeClick: async (n) => {
       if (lockedNode) {
+        if (lockedNode.id === n.id) {
+          notification.error({
+            placement: "bottomRight",
+            message: "选中的两个节点不能为同一节点",
+          });
+          return;
+        }
         const from = lockedNode,
           to = n;
-        await createLink(graphName!, {
-          from: from.id,
-          to: to.id,
-          name: "",
-        });
-        pollGraph();
-        graphStore.lockedNode = null;
+        try {
+          const name: string = await inputRef.current!.getInputName() as any;
+          await createLink(graphName!, {
+            from: from.id,
+            to: to.id,
+            name,
+          });
+          pollGraph();
+          graphStore.lockedNode = null;
+        } catch {
+        }
       } else {
         graphStore.currentBase = n;
       }
@@ -90,6 +107,7 @@ export const IndexPage = () => {
     },
   };
   const warpperRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<InputPromptRef>(null);
 
   const [forceSize, setForceSize] = useState(() => {
     const container = warpperRef.current;
@@ -152,9 +170,79 @@ export const IndexPage = () => {
       </main>
       <SettingDrawer />
       <UpdateWindow />
+      <InputPrompt ref={inputRef} />
     </KBarProvider>
   );
 };
+
+function initialPromise() {
+  let res_: (value: unknown) => void, rej_: (r: any) => void;
+  const _p = new Promise((res, rej) => {
+    res_ = res;
+    rej_ = rej;
+  });
+
+  return {
+    status: _p,
+    // @ts-ignore
+    rej: rej_,
+    // @ts-ignore
+    res: res_,
+  };
+}
+type InputPromptRef = {
+  getInputName: () => Promise<unknown>;
+};
+
+const InputPrompt = forwardRef<InputPromptRef, {}>(({}, ref) => {
+  const [open, setOpen] = useState(false);
+  const promiseRef = useRef(initialPromise());
+  const [form] = Form.useForm();
+
+  useImperativeHandle(ref, () => ({
+    getInputName() {
+      setOpen(true);
+      return promiseRef.current.status;
+    },
+  }));
+  return (
+    <Modal
+      open={open}
+      onOk={() => {
+        form
+          .validateFields()
+          .then((value) => {
+            const { name } = value;
+            promiseRef.current.res(name);
+            setOpen(false);
+          })
+          .catch((err) => {
+            notification.error({
+              placement: "bottomRight",
+              message: "请输入关系名称",
+            });
+          });
+      }}
+      onCancel={() => {
+        promiseRef.current.rej("");
+        setOpen(false);
+      }}
+    >
+      <Form form={form}>
+        <Form.Item
+          rules={[
+            {
+              required: true,
+            },
+          ]}
+          name="name"
+        >
+          <Input placeholder="请输入关系名称" />
+        </Form.Item>
+      </Form>
+    </Modal>
+  );
+});
 
 const useResize = (ev: string, handler: EventListenerOrEventListenerObject) => {
   const handlerRef = useRef<EventListenerOrEventListenerObject | undefined>(

@@ -7,3 +7,12 @@ export const addGraph = (data: any) => {
     data,
   });
 };
+
+export const uploadGraph = (graph: string, data: any) => {
+  return request({
+    url: "/api/graph/bulkCreate",
+    data,
+    params: { graph },
+    method: "POST",
+  });
+};

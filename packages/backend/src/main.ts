@@ -6,12 +6,12 @@ import { neo4jInitial } from "./db/neo4j";
 
 const PORT = 3001;
 
-; (async () => {
-  await mongoInitial()
+(async () => {
+  await mongoInitial();
   await neo4jInitial();
   const app = express();
   // app.use(express.urlencoded({ extended: false }));
-  app.use(express.json())
+  app.use(express.json());
 
   app.use(morgan("tiny"));
 
@@ -19,7 +19,6 @@ const PORT = 3001;
 
   // @ts-ignore
   app.use((error, req, res, next) => {
-    console.error(error);
     res.status(400).send(error);
   });
 

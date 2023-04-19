@@ -2,6 +2,9 @@ import { Router } from "express";
 import { Graph } from "../db/mongo";
 import z from "zod";
 import { neo4j } from "../db/neo4j";
+import { pick } from "radash";
+import transform from "../transformer/transform";
+import { LINK_LABEL } from "./link";
 
 const graphRouter = Router();
 
@@ -99,4 +102,98 @@ graphRouter.put("/", async (req, res) => {
   });
   session.close();
 });
+
+const blukBody = z.object({
+  nodes: z.array(
+    z.object({
+      name: z.string(),
+      id: z.string(),
+      group: z.string(),
+    })
+  ),
+  links: z.array(
+    z
+      .object({
+        from: z.string(),
+        to: z.string(),
+        name: z.string(),
+        id: z.string(),
+      })
+      .partial({ name: true })
+  ),
+  groups: z.array(z.string()),
+});
+/**
+ * 上传创建
+ */
+graphRouter.post(
+  "/bulkCreate",
+  // (req, res, next) => {
+  //   try {
+  //     validGraph.parse(req.query);
+  //     next();
+  //   } catch (err) {
+  //     res.status(400).send(err);
+  //   }
+  // },
+  async (req, res) => {
+    const graph = (req.query as any).graph as string;
+    const g = await Graph.findOne({
+      name: graph,
+    });
+    if (g) {
+      const { groups } = g;
+      const body = blukBody.parse(req.body);
+      const saveGroups = body.groups.filter((group) => !groups.includes(group));
+      if (saveGroups.length > 0) {
+        await Graph.updateOne(
+          {
+            name: graph,
+          },
+          {
+            groups: [...groups, ...saveGroups],
+          }
+        );
+      }
+      const { nodes: reqNodes, links: reqLinks } = body;
+      const session = neo4j.session();
+      const nodeIdMap = new Map<string, string>();
+      const nodeIds: string[] = [];
+      const createNodeCql = `
+UNWIND [${reqNodes
+        .map((node) => {
+          nodeIds.push(node.id);
+          return `{name: "${node.name}", group: "${node.group}"}`;
+        })
+        .join(", ")}] as node
+CREATE (n:\`${graph}\` {name: node.name, group: node.group})
+RETURN n
+`;
+      const response = await session.run(createNodeCql);
+      const { nodes } = transform(response.records);
+      nodes.forEach((node, index) => {
+        nodeIdMap.set(nodeIds[index], node.id);
+      });
+      const createLinkCql = `UNWIND [${reqLinks
+        .filter((link) => nodeIdMap.get(link.from) && nodeIdMap.get(link.to))
+        .map((link) => {
+          const from = nodeIdMap.get(link.from)!;
+          const to = nodeIdMap.get(link.to)!;
+
+          return `{ from: "${from}", to: "${to}", name: "${link.name || ""}" }`;
+        })
+        .join(",")}] as link
+MATCH (n1:\`${graph}\`),(n2:\`${graph}\`) WHERE elementId(n1)=link.from AND elementId(n2)=link.to
+CREATE (n1)-[r:${LINK_LABEL}{name: link.name}]->(n2)
+RETURN r
+`;
+      const linkResponse = await session.run(createLinkCql);
+
+      res.send({
+        node: response,
+        link: linkResponse,
+      });
+    }
+  }
+);
 export default graphRouter;
