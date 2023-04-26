@@ -1,13 +1,13 @@
 import {
-  ArrowRightOutlined,
-  BoldOutlined,
   CloseCircleOutlined,
   DeleteOutlined,
   DownloadOutlined,
   InboxOutlined,
   PlusOutlined,
   QuestionCircleOutlined,
+  ReloadOutlined,
   SettingOutlined,
+  SwapOutlined,
   UploadOutlined,
 } from "@ant-design/icons";
 import { useBoolean, useRequest } from "ahooks";
@@ -20,9 +20,10 @@ import {
   Upload,
   UploadProps,
   Tooltip,
+  notification,
 } from "antd";
 import { DefaultOptionType } from "antd/es/select";
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import {
   createGroup,
   createNode,
@@ -45,8 +46,15 @@ const SuffixHeaderButtons = () => {
   const [addVisible, { toggle: toggleAdd }] = useBoolean(false);
   const [form] = useForm();
   const [groupForm] = useForm();
-  const { graphName, pollGraph, currentBase, lockedNode, nodes, links } =
-    graphStore;
+  const {
+    graphName,
+    pollGraph,
+    currentBase,
+    lockedNode,
+    nodes,
+    links,
+    searchNodeId,
+  } = graphStore;
   const [isNode, isLink] = useMemo(() => {
     if (!currentBase) {
       return [false, false];
@@ -60,6 +68,17 @@ const SuffixHeaderButtons = () => {
 
   const btns = useMemo(
     () => [
+      {
+        children: (
+          <ReloadOutlined style={{ color: !searchNodeId ? "#999" : "unset" }} />
+        ),
+        onClick: () => {
+          graphStore.searchNodeId = null;
+          pollGraph();
+        },
+        disable: !searchNodeId,
+        tooltip: "切回全局图谱",
+      },
       {
         children: <DownloadOutlined />,
         onClick: () => {
@@ -83,28 +102,22 @@ const SuffixHeaderButtons = () => {
       {
         ...(lockedNode
           ? {
-              children: (
-                <CloseCircleOutlined
-                  style={{ color: !isNode ? "#999" : "unset" }}
-                />
-              ),
+              children: <CloseCircleOutlined style={{ color: "red" }} />,
               onClick: () => {
                 graphStore.lockedNode = null;
               },
-              disable: !isNode,
-              tooltip: "创建关系",
+              disable: false,
+              tooltip: "取消创建",
             }
           : {
               children: (
-                <ArrowRightOutlined
-                  style={{ color: !isNode ? "#999" : "unset" }}
-                />
+                <SwapOutlined style={{ color: !isNode ? "#999" : "unset" }} />
               ),
               onClick: () => {
                 graphStore.lockedNode = currentBase as any;
               },
               disable: !isNode,
-              tooltip: "取消创建",
+              tooltip: "创建关系",
             }),
       },
       {
@@ -167,7 +180,16 @@ const SuffixHeaderButtons = () => {
         tooltip: "帮助",
       },
     ],
-    [graphName, isNode, isLink, currentBase, lockedNode, nodes, links]
+    [
+      graphName,
+      isNode,
+      isLink,
+      currentBase,
+      lockedNode,
+      nodes,
+      links,
+      searchNodeId,
+    ]
   );
 
   const fixVisible = (state: boolean) => {
@@ -294,7 +316,7 @@ const SuffixHeaderButtons = () => {
 
 const UploadModal = () => {
   const [visible, { toggle }] = useBoolean(false);
-  const { graphName } = graphStore;
+  const { graphName, pollGraph } = graphStore;
   const uploadProps: UploadProps = useMemo(
     () => ({
       name: "file",
@@ -309,7 +331,17 @@ const UploadModal = () => {
           if (result && typeof result === "string") {
             // console.log(result);
             const obj = parseCsv(result);
-            uploadGraph(graphName!, obj).then((res) => {});
+            uploadGraph(graphName!, obj).then((res) => {
+              notification.success({
+                placement: "bottomRight",
+                message: "图谱文件上传成功",
+              });
+              pollGraph();
+            });
+            notification.info({
+              placement: "bottomRight",
+              message: "正在上传文件",
+            });
           }
         };
         return false;

@@ -101,6 +101,7 @@ export const SearchBar = forwardRef<{
         <KBarPositioner
           style={{
             zIndex: 1000,
+            background: "#00000090"
           }}
         >
           <KBarAnimator className={styles.kbarAnimator}>

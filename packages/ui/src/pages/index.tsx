@@ -71,7 +71,7 @@ export const IndexPage = () => {
         const from = lockedNode,
           to = n;
         try {
-          const name: string = await inputRef.current!.getInputName() as any;
+          const name: string = (await inputRef.current!.getInputName()) as any;
           await createLink(graphName!, {
             from: from.id,
             to: to.id,
@@ -79,8 +79,7 @@ export const IndexPage = () => {
           });
           pollGraph();
           graphStore.lockedNode = null;
-        } catch {
-        }
+        } catch {}
       } else {
         graphStore.currentBase = n;
       }
@@ -212,9 +211,12 @@ const InputPrompt = forwardRef<InputPromptRef, {}>(({}, ref) => {
         form
           .validateFields()
           .then((value) => {
-            const { name } = value;
+            const { name = "" } = value;
             promiseRef.current.res(name);
             setOpen(false);
+        setTimeout(() => {
+          promiseRef.current = initialPromise();
+        }, 100);
           })
           .catch((err) => {
             notification.error({
@@ -225,16 +227,21 @@ const InputPrompt = forwardRef<InputPromptRef, {}>(({}, ref) => {
       }}
       onCancel={() => {
         promiseRef.current.rej("");
+
         setOpen(false);
+        setTimeout(() => {
+          promiseRef.current = initialPromise();
+        }, 100);
       }}
+      title="创建新关系"
     >
       <Form form={form}>
         <Form.Item
-          rules={[
-            {
-              required: true,
-            },
-          ]}
+          // rules={[
+          //   {
+          //     required: true,
+          //   },
+          // ]}
           name="name"
         >
           <Input placeholder="请输入关系名称" />

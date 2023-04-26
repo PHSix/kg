@@ -21,7 +21,7 @@ const graphStore = resso<{
   pollGraph: (graph, ab) => {
     const _graph = graph || graphStore.graphName;
     if (_graph === graph) {
-      graphStore.searchNodeId = null;
+      graphStore.searchNodeId = null
     }
     graphStore.graphName = _graph;
     getNode(_graph!, graphStore.searchNodeId, ab).then((res) => {
