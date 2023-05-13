@@ -126,35 +126,25 @@
   border-radius: 7px;
   background-color: #fff;
   box-shadow: 0 0 4px #aaa;
-  height: 200px;
   width: 400px;
   z-index: 1000;
 
   .attributeHeader {
-    height: 20px;
+    height: 2em;
+    background-color: #ecfdf5;
+    padding: 0 0.5em;
     display: flex;
-    justify-content: space-between;
-    padding: 10px;
     align-items: center;
-    .attributeClose {
-      color: #aaa;
-    }
+    border-top-left-radius: 7px;
+    border-top-right-radius: 7px;
   }
 
-  .attributeBody {
-    .attributeRow {
-      padding: 10px 20px;
-      .attributeKey {
-        font-family: sans-serif;
-        // font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
-        font-size: 20px;
-        font-weight: 700;
-        line-height: 30px;
-      }
-      .attributeValue {
-        font-family: sans-serif;
-        font-size: 20px;
-        font-weight: 700;
+  .attributeContent {
+    width: 100%;
+    padding: 10px 10px;
+    :global {
+      .ant-col {
+        font-size: 1em;
       }
     }
   }

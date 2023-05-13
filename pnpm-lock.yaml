@@ -85,6 +85,9 @@ importers:
       dayjs:
         specifier: ^1.11.7
         version: 1.11.7
+      echarts:
+        specifier: ^5.4.2
+        version: 5.4.2
       kbar:
         specifier: 0.1.0-beta.40
         version: 0.1.0-beta.40(react-dom@18.2.0)(react@18.2.0)
@@ -3385,6 +3388,13 @@ packages:
 
   /dom-align@1.12.4:
     resolution: {integrity: sha512-R8LUSEay/68zE5c8/3BDxiTEvgb4xZTF0RKmAHfiEVN3klfIpXfi2/QCoiWPccVQ0J/ZGdz9OjzL4uJEP/MRAw==}
+    dev: false
+
+  /echarts@5.4.2:
+    resolution: {integrity: sha512-2W3vw3oI2tWJdyAz+b8DuWS0nfXtSDqlDmqgin/lfzbkB01cuMEN66KWBlmur3YMp5nEDEEt5s23pllnAzB4EA==}
+    dependencies:
+      tslib: 2.3.0
+      zrender: 5.4.3
     dev: false
 
   /ee-first@1.1.1:

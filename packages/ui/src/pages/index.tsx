@@ -24,7 +24,6 @@ const NODE_STATE_STYLES = {
   normal: {
     distance: 2,
     label: {
-      show: true,
       space: "nowrap",
       textOffset: "10",
       rectFillStyle: "rgba(39, 56, 73, 0.8)",
@@ -32,6 +31,21 @@ const NODE_STATE_STYLES = {
     },
     shadowBlur: 0,
   },
+  selected: {
+    borderSpin: true,
+  },
+
+  // normal: {
+  //   distance: 2,
+  //   label: {
+  //     show: true,
+  //     space: "nowrap",
+  //     textOffset: "10",
+  //     rectFillStyle: "rgba(39, 56, 73, 0.8)",
+  //     textWidth: 80,
+  //   },
+  //   shadowBlur: 0,
+  // },
 };
 
 export const IndexPage = () => {
@@ -214,9 +228,9 @@ const InputPrompt = forwardRef<InputPromptRef, {}>(({}, ref) => {
             const { name = "" } = value;
             promiseRef.current.res(name);
             setOpen(false);
-        setTimeout(() => {
-          promiseRef.current = initialPromise();
-        }, 100);
+            setTimeout(() => {
+              promiseRef.current = initialPromise();
+            }, 100);
           })
           .catch((err) => {
             notification.error({

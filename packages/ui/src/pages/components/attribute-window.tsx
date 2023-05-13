@@ -1,6 +1,6 @@
 import { CloseOutlined } from "@ant-design/icons";
 import { useUpdateEffect } from "ahooks";
-import { Col, Row } from "antd";
+import { Col, Row, Tag } from "antd";
 import { useState } from "react";
 import graphStore from "../../stores/graph";
 import settingStore from "../../stores/setting";
@@ -19,37 +19,48 @@ const AttributeWindow = () => {
   if (!display || !currentBase || !displayAttribute) {
     return null;
   }
+  const isNode = !!currentBase.schema_name;
 
   return (
     <section className={styles.attributeContainer}>
       <div className={styles.attributeHeader}>
-      <div>属性窗口</div>
         <CloseOutlined
-          className={styles.attributeClose}
+          style={{
+            color: "black",
+            cursor: "pointer",
+          }}
           onClick={() => {
             setDisplay(false);
           }}
-        ></CloseOutlined>
+        />
       </div>
-      <div className={styles.attributeBody}>
-        <Row className={styles.attributeRow}>
-          <Col className={styles.attributeKey} span={6}>
-            Name:
-          </Col>
-          <Col className={styles.attributeValue}>{currentBase?.name}</Col>
-        </Row>
-
-        {currentBase?.schema_name && (
-          <Row className={styles.attributeRow}>
-            <Col className={styles.attributeKey} span={6}>
-              Group:
+      <Row className={styles.attributeContent}>
+        {isNode ? (
+          <>
+            <Col style={{ fontSize: "1.4em", textAlign: "right" }} span={8}>
+              知识点名称：
             </Col>
-            <Col className={styles.attributeValue}>
-              {currentBase?.schema_name}
+            <Col style={{ fontSize: "1.4em" }} span={16}>
+              {currentBase.name}
             </Col>
-          </Row>
+            <Col style={{ fontSize: "1.4em", textAlign: "right" }} span={8}>
+              知识点分类：
+            </Col>
+            <Col style={{ fontSize: "1.4em" }} span={16}>
+              {currentBase.schema_name}
+            </Col>
+          </>
+        ) : (
+          <>
+            <Col span={24}>
+              从知识点
+              <Tag color="green">{currentBase.source?.name}</Tag>到知识点
+              <Tag color="green">知识点：{currentBase.target.name}</Tag>的关系：
+              <Tag color="magenta">{currentBase.name}</Tag>
+            </Col>
+          </>
         )}
-      </div>
+      </Row>
     </section>
   );
 };
