@@ -19,6 +19,7 @@ import SuffixHeaderButtons from "./components/suffix-header-buttons";
 import UpdateWindow from "./components/update-window";
 import { createLink } from "../api/link";
 import AttributeWindow from "./components/attribute-window";
+import {EchartsGraph} from "./components/echarts-graph";
 
 const NODE_STATE_STYLES = {
   normal: {
@@ -48,6 +49,12 @@ const NODE_STATE_STYLES = {
   // },
 };
 
+const LINK_STATE_STYLES = {
+  normal: {
+    distance: 180,
+  },
+};
+
 export const IndexPage = () => {
   const barRef = useRef<{
     setOnOpen: VoidFunction;
@@ -70,8 +77,6 @@ export const IndexPage = () => {
     | "onNodeDbClick"
     | "onLinkDbClick"
     | "onCanvasClick"
-    | "contextmenuNodePopover"
-    | "onNodeHover"
   > = {
     onNodeClick: async (n) => {
       if (lockedNode) {
@@ -167,16 +172,18 @@ export const IndexPage = () => {
             ></Spin>
           ) : (
             <div className={styles.forceWrapper} ref={warpperRef}>
-              <Force
-                option={{
-                  width: forceSize.width,
-                  height: forceSize.height,
-                }}
-                data={data}
-                nodeStateStyles={NODE_STATE_STYLES}
-                lockedNode={lockedNode ?? undefined}
-                {...forceBehaviors}
-              />
+              <EchartsGraph inputRef={inputRef} />
+              {/* <Force */}
+              {/*   option={{ */}
+              {/*     width: forceSize.width, */}
+              {/*     height: forceSize.height, */}
+              {/*   }} */}
+              {/*   data={data} */}
+              {/*   nodeStateStyles={NODE_STATE_STYLES as any} */}
+              {/*   lockedNode={lockedNode ?? undefined} */}
+              {/*   linkStateStyles={LINK_STATE_STYLES} */}
+              {/*   {...forceBehaviors} */}
+              {/* /> */}
             </div>
           )}
         </section>

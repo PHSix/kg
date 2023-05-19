@@ -6,7 +6,8 @@ import settingStore from "../stores/setting";
  */
 export const getNode = (
   graph: string,
-  nodeId?: string | null,
+  nodeId: string | null,
+  direction: "both" | "in" | "out",
   abortController?: AbortController
 ) => {
   return request({
@@ -14,6 +15,7 @@ export const getNode = (
     params: {
       graph,
       depth: settingStore.depth,
+      direction,
     },
     method: "GET",
     signal: abortController?.signal,

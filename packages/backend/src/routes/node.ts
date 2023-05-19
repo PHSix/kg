@@ -42,7 +42,7 @@ nodeRouter.get("/", async (req, res) => {
 });
 
 /*
- * 获取整个图
+ * 获取整个图，包括节点和关系
  * */
 nodeRouter.get("/get", async (req, res) => {
   const { graph } = req.query;
@@ -67,11 +67,18 @@ nodeRouter.get("/get", async (req, res) => {
  * 获取某个节点的数据，包括获取该节点展开的图
  * */
 nodeRouter.get("/get/:id", async (req, res) => {
-  const { graph, depth = 2 } = req.query;
+  const { graph, depth = 2, direction = "both" } = req.query;
   const { id } = req.params;
 
   const session = neo4j.session();
-  const cql = `MATCH (n:\`${graph}\`)-[r*..${depth}]-(m:\`${graph}\`) WHERE elementId(n)="${id}" RETURN n,r,m`;
+  let cql: string;
+  if (direction === "in") {
+    cql = `MATCH (m:\`${graph}\`)-[r*..${depth}]->(n:\`${graph}\`) WHERE elementId(n)="${id}" RETURN n,r,m`;
+  } else if (direction === "out") {
+    cql = `MATCH (n:\`${graph}\`)-[r*..${depth}]->(m:\`${graph}\`) WHERE elementId(n)="${id}" RETURN n,r,m`;
+  } else {
+    cql = `MATCH (n:\`${graph}\`)-[r*..${depth}]-(m:\`${graph}\`) WHERE elementId(n)="${id}" RETURN n,r,m`;
+  }
   const reRes = await session.run(cql);
   const thisRes = await session.run(
     `MATCH (n:\`${graph}\`) WHERE elementId(n)="${id}" RETURN n`

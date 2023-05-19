@@ -55,7 +55,7 @@ const AttributeWindow = () => {
             <Col span={24}>
               从知识点
               <Tag color="green">{currentBase.source?.name}</Tag>到知识点
-              <Tag color="green">知识点：{currentBase.target.name}</Tag>的关系：
+              <Tag color="green">{currentBase.target.name}</Tag>的关系：
               <Tag color="magenta">{currentBase.name}</Tag>
             </Col>
           </>

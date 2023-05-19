@@ -23,6 +23,7 @@ export const updateLink = (
   payload: { name: string; from: string; to: string; graph: string, id: string }
 ) => {
   const data = {
+    // @ts-ignore
     id,
     ...payload,
   };

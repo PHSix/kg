@@ -1,5 +1,6 @@
-import { Drawer, Form, InputNumber, Switch } from "antd";
+import { Drawer, Form, InputNumber, Segmented, Switch } from "antd";
 import { FC } from "react";
+import graphStore from "../../stores/graph";
 import settingStore from "../../stores/setting";
 
 const SettingDrawer: FC = () => {
@@ -13,7 +14,7 @@ const SettingDrawer: FC = () => {
       placement="right"
       title={"设置"}
     >
-      <Form labelCol={{ span: 14 }}>
+      <Form>
         <Form.Item label="搜索节点的查找最深深度">
           <InputNumber
             value={depth}
@@ -23,6 +24,29 @@ const SettingDrawer: FC = () => {
               }
             }}
           ></InputNumber>
+        </Form.Item>
+
+        <Form.Item label="搜索模式">
+          <Segmented
+            options={[
+              {
+                label: "双向搜索",
+                value: "both",
+              },
+              {
+                label: "从节点指出",
+                value: "out",
+              },
+              {
+                label: "指向节点",
+                value: "in",
+              },
+            ]}
+            defaultValue="both"
+            onChange={(value) => {
+              graphStore.direction = value as any;
+            }}
+          ></Segmented>
         </Form.Item>
         <Form.Item label="是否展示属性窗口">
           <Switch

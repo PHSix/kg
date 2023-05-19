@@ -122,12 +122,12 @@ const SuffixHeaderButtons = () => {
       },
       {
         children: (
-          <PlusOutlined style={{ color: !graphName ? "#999" : "unset" }} />
+          <PlusOutlined style={{ color: !graphName || searchNodeId ? "#999" : "unset" }} />
         ),
         onClick: () => {
           toggleModal();
         },
-        disable: !graphName,
+        disable: !graphName || searchNodeId,
         tooltip: "新增节点",
       },
       {
