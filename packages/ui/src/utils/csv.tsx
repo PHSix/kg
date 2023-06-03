@@ -5,7 +5,7 @@ const DEFAULTHEADER = "id,group,name,from,to";
 
 export function parseCsv(content: string) {
   const lines = content.split("\n");
-  lines.shift()
+  lines.shift(); // 去除表头
   const groupSet = new Set<string>();
   const { nodes, links } = lines.reduce(
     (t, c) => {

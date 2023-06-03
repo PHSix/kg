@@ -1,0 +1,3 @@
+[submodule "packages/backend/query_kg"]
+	path = packages/backend/query_kg
+	url = git@github.com:PHSix/WEB_KG.git

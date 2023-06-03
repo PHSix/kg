@@ -103,7 +103,7 @@ graphRouter.put("/", async (req, res) => {
   session.close();
 });
 
-const blukBody = z.object({
+const bulkBody = z.object({
   nodes: z.array(
     z.object({
       name: z.string(),
@@ -117,7 +117,6 @@ const blukBody = z.object({
         from: z.string(),
         to: z.string(),
         name: z.string(),
-        id: z.string(),
       })
       .partial({ name: true })
   ),
@@ -143,15 +142,15 @@ graphRouter.post(
     });
     if (g) {
       const { groups } = g;
-      const body = blukBody.parse(req.body);
-      const saveGroups = body.groups.filter((group) => !groups.includes(group));
-      if (saveGroups.length > 0) {
+      const body = bulkBody.parse(req.body);
+      const savedGroups = body.groups.filter((group) => !groups.includes(group));
+      if (savedGroups.length > 0) {
         await Graph.updateOne(
           {
             name: graph,
           },
           {
-            groups: [...groups, ...saveGroups],
+            groups: [...groups, ...savedGroups],
           }
         );
       }
@@ -161,11 +160,11 @@ graphRouter.post(
       const nodeIds: string[] = [];
       const createNodeCql = `
 UNWIND [${reqNodes
-        .map((node) => {
-          nodeIds.push(node.id);
-          return `{name: "${node.name}", group: "${node.group}"}`;
-        })
-        .join(", ")}] as node
+          .map((node) => {
+            nodeIds.push(node.id);
+            return `{name: "${node.name}", group: "${node.group}"}`;
+          })
+          .join(", ")}] as node
 CREATE (n:\`${graph}\` {name: node.name, group: node.group})
 RETURN n
 `;

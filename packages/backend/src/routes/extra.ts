@@ -1,6 +1,7 @@
 import { Router } from "express";
 import multer from "multer";
 import { readFile } from "fs/promises";
+import { query } from "../query";
 
 const extraRouter = Router();
 const upload = multer({ dest: "uploads/" });
@@ -82,5 +83,15 @@ extraRouter.get('/download/csv', async (req, res) => {
     data: []
   })
 })
+
+extraRouter.get("/query", async (req, res) => {
+  const { topic } = req.query;
+  const data = await query(topic as string)
+  res.send({
+    code: 200,
+    data
+  })
+})
+
 
 export default extraRouter;

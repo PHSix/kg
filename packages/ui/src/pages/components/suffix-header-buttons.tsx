@@ -36,7 +36,8 @@ import styles from "./components.module.scss";
 import { deleteLink } from "../../api/link";
 import MarkdownDoc from "./markdown-doc";
 import { forCsv, parseCsv } from "../../utils/csv";
-import { uploadGraph } from "../../api/graph";
+import { bulkCreate } from "../../api/graph";
+import { QueryButton } from "./query-button";
 
 const { useForm } = Form;
 const { Dragger } = Upload;
@@ -68,6 +69,12 @@ const SuffixHeaderButtons = () => {
 
   const btns = useMemo(
     () => [
+      {
+        children: <QueryButton />,
+        onClick: () => {},
+        disable: false,
+        tooltip: "搜索知识点",
+      },
       {
         children: (
           <ReloadOutlined style={{ color: !searchNodeId ? "#999" : "unset" }} />
@@ -122,7 +129,9 @@ const SuffixHeaderButtons = () => {
       },
       {
         children: (
-          <PlusOutlined style={{ color: !graphName || searchNodeId ? "#999" : "unset" }} />
+          <PlusOutlined
+            style={{ color: !graphName || searchNodeId ? "#999" : "unset" }}
+          />
         ),
         onClick: () => {
           toggleModal();
@@ -331,7 +340,7 @@ const UploadModal = () => {
           if (result && typeof result === "string") {
             // console.log(result);
             const obj = parseCsv(result);
-            uploadGraph(graphName!, obj).then((res) => {
+            bulkCreate(graphName!, obj).then((res) => {
               notification.success({
                 placement: "bottomRight",
                 message: "图谱文件上传成功",

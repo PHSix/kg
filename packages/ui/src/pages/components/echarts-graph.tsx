@@ -7,7 +7,7 @@ import { notification } from "antd";
 import { createLink } from "../../api/link";
 import { throttle } from "radash";
 
-const getOption = ([nodes, links]: [INode[], ILink[]], name: string) => {
+export const getOption = ([nodes, links]: [INode[], ILink[]], name: string) => {
   const categories = [
     ...nodes
       .reduce((res, c) => {

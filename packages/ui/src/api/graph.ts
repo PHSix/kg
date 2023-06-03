@@ -8,7 +8,7 @@ export const addGraph = (data: any) => {
   });
 };
 
-export const uploadGraph = (graph: string, data: any) => {
+export const bulkCreate = (graph: string, data: any) => {
   return request({
     url: "/api/graph/bulkCreate",
     data,
@@ -16,3 +16,11 @@ export const uploadGraph = (graph: string, data: any) => {
     method: "POST",
   });
 };
+
+export const getQuery = (topic: string) => {
+  return request({
+    url: "/api/extra/query",
+    params: { topic },
+    method: "GET"
+  })
+}
