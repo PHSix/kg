@@ -5,6 +5,9 @@ const uniqueID = () => {
   return _id++;
 }
 
+/*
+ * query by `query_by` project result
+ * */
 export async function query(topic: string) {
   const cwd = process.cwd() + "/query_kg/baike";
   await new Promise((resolve, reject) => {

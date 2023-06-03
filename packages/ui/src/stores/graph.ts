@@ -1,7 +1,7 @@
 import resso from "resso";
 // import { ForceNodeType, ForceLinkType } from "@model";
-import { ILink, INode } from "@bixi-design/graphs";
 import { getNode } from "../api/node";
+import { ILink, INode } from "../utils/type";
 
 const graphStore = resso<{
   graphName: string | null;

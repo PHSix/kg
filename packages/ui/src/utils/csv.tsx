@@ -1,6 +1,4 @@
-import { ILink, INode } from "@bixi-design/graphs";
-import {} from "radash";
-
+import { ILink, INode } from "./type";
 const DEFAULTHEADER = "id,group,name,from,to";
 
 export function parseCsv(content: string) {

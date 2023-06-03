@@ -1,4 +1,4 @@
-import { ILink, INode } from "@bixi-design/graphs";
+import { ILink, INode } from "./type";
 
 const exportGraph = (nodes: INode[], links: ILink[]) => {
   const idMap = new Map<number, string>();

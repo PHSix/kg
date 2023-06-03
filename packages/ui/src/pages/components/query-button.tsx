@@ -2,10 +2,10 @@ import { SearchOutlined } from "@ant-design/icons";
 import { Button, Empty, Input, Skeleton, Space, notification } from "antd";
 import Modal from "antd/es/modal/Modal";
 import { FC, memo, useEffect, useRef, useState } from "react";
-import { ILink, INode } from "@bixi-design/graphs";
 import { bulkCreate, getQuery } from "../../api/graph";
 import * as echarts from "echarts";
 import graphStore from "../../stores/graph";
+import { ILink, INode } from "../../utils/type";
 
 const getOption = ([nodes, links]: [INode[], ILink[]]) => {
   const categories = [

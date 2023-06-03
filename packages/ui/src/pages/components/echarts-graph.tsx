@@ -1,11 +1,11 @@
 import styles from "./components.module.scss";
-import { ILink, INode } from "@bixi-design/graphs";
 import * as echarts from "echarts";
 import { FC, useEffect, useMemo, useRef } from "react";
 import graphStore from "../../stores/graph";
 import { notification } from "antd";
 import { createLink } from "../../api/link";
 import { throttle } from "radash";
+import { ILink, INode } from "../../utils/type";
 
 export const getOption = ([nodes, links]: [INode[], ILink[]], name: string) => {
   const categories = [

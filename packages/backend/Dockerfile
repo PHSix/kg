@@ -1,6 +1,7 @@
 FROM node:latest
 WORKDIR /srv/app
 COPY . .
-RUN pnpm install
-EXPOSE 3000
-CMD [\"pnpm\", \"run\", \"start\"]
+RUN npm install yarn
+RUN yarn
+EXPOSE 3001
+RUN yarn dev

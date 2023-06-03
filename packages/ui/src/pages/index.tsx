@@ -1,14 +1,11 @@
 import { Modal, notification, Spin, Form, Input } from "antd";
 import {
   forwardRef,
-  useEffect,
   useImperativeHandle,
-  useMemo,
   useRef,
   useState,
 } from "react";
 import { KBarProvider } from "kbar";
-import { Force, IGraphProps } from "@bixi-design/graphs";
 
 import styles from "./index.module.scss";
 import { SearchBar } from "./components/search-bar";
@@ -17,130 +14,18 @@ import graphStore from "../stores/graph";
 import SettingDrawer from "./components/setting-drawer";
 import SuffixHeaderButtons from "./components/suffix-header-buttons";
 import UpdateWindow from "./components/update-window";
-import { createLink } from "../api/link";
 import AttributeWindow from "./components/attribute-window";
-import {EchartsGraph} from "./components/echarts-graph";
-
-const NODE_STATE_STYLES = {
-  normal: {
-    distance: 2,
-    label: {
-      space: "nowrap",
-      textOffset: "10",
-      rectFillStyle: "rgba(39, 56, 73, 0.8)",
-      textWidth: 80,
-    },
-    shadowBlur: 0,
-  },
-  selected: {
-    borderSpin: true,
-  },
-
-  // normal: {
-  //   distance: 2,
-  //   label: {
-  //     show: true,
-  //     space: "nowrap",
-  //     textOffset: "10",
-  //     rectFillStyle: "rgba(39, 56, 73, 0.8)",
-  //     textWidth: 80,
-  //   },
-  //   shadowBlur: 0,
-  // },
-};
-
-const LINK_STATE_STYLES = {
-  normal: {
-    distance: 180,
-  },
-};
+import { EchartsGraph } from "./components/echarts-graph";
 
 export const IndexPage = () => {
   const barRef = useRef<{
     setOnOpen: VoidFunction;
   }>(null);
-  const { graphName, nodes, links, isPulling, lockedNode, pollGraph } =
+  const { graphName, isPulling } =
     graphStore;
-  const data = useMemo(
-    () => ({
-      nodes,
-      links,
-    }),
-    [nodes, links]
-  );
-  const clickRef = useRef<number>();
 
-  const forceBehaviors: Pick<
-    IGraphProps,
-    | "onNodeClick"
-    | "onLinkClick"
-    | "onNodeDbClick"
-    | "onLinkDbClick"
-    | "onCanvasClick"
-  > = {
-    onNodeClick: async (n) => {
-      if (lockedNode) {
-        if (lockedNode.id === n.id) {
-          notification.error({
-            placement: "bottomRight",
-            message: "选中的两个节点不能为同一节点",
-          });
-          return;
-        }
-        const from = lockedNode,
-          to = n;
-        try {
-          const name: string = (await inputRef.current!.getInputName()) as any;
-          await createLink(graphName!, {
-            from: from.id,
-            to: to.id,
-            name,
-          });
-          pollGraph();
-          graphStore.lockedNode = null;
-        } catch {}
-      } else {
-        graphStore.currentBase = n;
-      }
-    },
-    onLinkClick: (l) => {
-      if (clickRef.current) {
-        clearTimeout(clickRef.current);
-        graphStore.updateBase = l;
-        clickRef.current = undefined;
-      } else {
-        clickRef.current = setTimeout(() => {
-          graphStore.currentBase = l;
-          clickRef.current = undefined;
-        }, 400);
-      }
-    },
-    onNodeDbClick: (n) => {
-      graphStore.updateBase = n;
-    },
-    onCanvasClick: (d) => {
-      if (!d) {
-        graphStore.currentBase = null;
-      }
-    },
-  };
   const warpperRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<InputPromptRef>(null);
-
-  const [forceSize, setForceSize] = useState(() => {
-    const container = warpperRef.current;
-    return {
-      width: container?.clientWidth || 0,
-      height: container?.clientHeight || 0,
-    };
-  });
-  useResize("resize", () => {
-    const container = warpperRef.current;
-    setForceSize({
-      width: container?.clientWidth || 0,
-      height: container?.clientHeight || 0,
-    });
-  });
 
   return (
     <KBarProvider
@@ -214,7 +99,7 @@ type InputPromptRef = {
   getInputName: () => Promise<unknown>;
 };
 
-const InputPrompt = forwardRef<InputPromptRef, {}>(({}, ref) => {
+const InputPrompt = forwardRef<InputPromptRef, {}>(({ }, ref) => {
   const [open, setOpen] = useState(false);
   const promiseRef = useRef(initialPromise());
   const [form] = Form.useForm();
@@ -239,7 +124,7 @@ const InputPrompt = forwardRef<InputPromptRef, {}>(({}, ref) => {
               promiseRef.current = initialPromise();
             }, 100);
           })
-          .catch((err) => {
+          .catch(() => {
             notification.error({
               placement: "bottomRight",
               message: "请输入关系名称",
@@ -272,20 +157,3 @@ const InputPrompt = forwardRef<InputPromptRef, {}>(({}, ref) => {
   );
 });
 
-const useResize = (ev: string, handler: EventListenerOrEventListenerObject) => {
-  const handlerRef = useRef<EventListenerOrEventListenerObject | undefined>(
-    undefined
-  );
-
-  useEffect(() => {
-    if (handlerRef.current) {
-      window.removeEventListener(ev, handler);
-    }
-    handlerRef.current = handler;
-    window.addEventListener(ev, handler);
-  }, [ev]);
-
-  return () => {
-    window.removeEventListener(ev, handler);
-  };
-};
