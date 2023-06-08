@@ -1,7 +1,7 @@
 FROM node:latest
 WORKDIR /srv/app
 COPY . .
-RUN npm install yarn
-RUN yarn
+RUN npm install pnpm
+RUN pnpm install
 EXPOSE 3001
-RUN yarn dev
+RUN pnpm run start
