@@ -1,10 +1,5 @@
 import { Modal, notification, Spin, Form, Input } from "antd";
-import {
-  forwardRef,
-  useImperativeHandle,
-  useRef,
-  useState,
-} from "react";
+import { forwardRef, useImperativeHandle, useRef, useState } from "react";
 import { KBarProvider } from "kbar";
 
 import styles from "./index.module.scss";
@@ -21,8 +16,7 @@ export const IndexPage = () => {
   const barRef = useRef<{
     setOnOpen: VoidFunction;
   }>(null);
-  const { graphName, isPulling } =
-    graphStore;
+  const { graphName, isPulling } = graphStore;
 
   const warpperRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<InputPromptRef>(null);
@@ -58,17 +52,6 @@ export const IndexPage = () => {
           ) : (
             <div className={styles.forceWrapper} ref={warpperRef}>
               <EchartsGraph inputRef={inputRef} />
-              {/* <Force */}
-              {/*   option={{ */}
-              {/*     width: forceSize.width, */}
-              {/*     height: forceSize.height, */}
-              {/*   }} */}
-              {/*   data={data} */}
-              {/*   nodeStateStyles={NODE_STATE_STYLES as any} */}
-              {/*   lockedNode={lockedNode ?? undefined} */}
-              {/*   linkStateStyles={LINK_STATE_STYLES} */}
-              {/*   {...forceBehaviors} */}
-              {/* /> */}
             </div>
           )}
         </section>
@@ -99,7 +82,7 @@ type InputPromptRef = {
   getInputName: () => Promise<unknown>;
 };
 
-const InputPrompt = forwardRef<InputPromptRef, {}>(({ }, ref) => {
+const InputPrompt = forwardRef<InputPromptRef, {}>(({}, ref) => {
   const [open, setOpen] = useState(false);
   const promiseRef = useRef(initialPromise());
   const [form] = Form.useForm();
@@ -156,4 +139,3 @@ const InputPrompt = forwardRef<InputPromptRef, {}>(({ }, ref) => {
     </Modal>
   );
 });
-
