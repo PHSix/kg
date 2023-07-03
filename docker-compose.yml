@@ -1,0 +1,7 @@
+version: "3"
+
+services:
+  backend:
+    build: ./packages/backend
+  ui:
+    build: ./packages/ui
