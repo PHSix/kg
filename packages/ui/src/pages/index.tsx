@@ -14,7 +14,7 @@ import { EchartsGraph } from "./components/echarts-graph";
 
 export const IndexPage = () => {
   const barRef = useRef<{
-    setOnOpen: VoidFunction;
+    triggerOpen: VoidFunction;
   }>(null);
   const { graphName, isPulling } = graphStore;
 
@@ -27,7 +27,7 @@ export const IndexPage = () => {
       options={{
         callbacks: {
           onOpen: () => {
-            barRef.current?.setOnOpen();
+            barRef.current?.triggerOpen();
           },
         },
       }}
@@ -35,6 +35,9 @@ export const IndexPage = () => {
       <main className={styles.indexContainer}>
         <AttributeWindow />
         <GraphSelector />
+
+        {/* main viewport header component. 
+        Include grpah name show, search bar, suffix action buttons */}
         <section className={styles.viewContainer}>
           <div className={styles.searchHeader}>
             <span className={styles.graphName}>
@@ -58,6 +61,8 @@ export const IndexPage = () => {
       </main>
       <SettingDrawer />
       <UpdateWindow />
+      {/* a global modal window for create a new link for `Force` component, 
+      use ref to trigger component show */}
       <InputPrompt ref={inputRef} />
     </KBarProvider>
   );
