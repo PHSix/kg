@@ -2,6 +2,7 @@ import {
   CloseCircleOutlined,
   DeleteOutlined,
   DownloadOutlined,
+  GlobalOutlined,
   InboxOutlined,
   PlusOutlined,
   QuestionCircleOutlined,
@@ -10,7 +11,7 @@ import {
   SwapOutlined,
   UploadOutlined,
 } from "@ant-design/icons";
-import { useBoolean, useRequest } from "ahooks";
+import { useBoolean, useRequest, useSize } from "ahooks";
 import {
   Modal,
   Space,
@@ -21,6 +22,8 @@ import {
   UploadProps,
   Tooltip,
   notification,
+  Menu,
+  Dropdown,
 } from "antd";
 import { DefaultOptionType } from "antd/es/select";
 import { useMemo } from "react";
@@ -67,14 +70,11 @@ const SuffixHeaderButtons = () => {
     return [true, false];
   }, [currentBase]);
 
+  const size = useSize(document.body);
+  const isEnoughWidth = !(size?.width && size.width < 1050);
+
   const btns = useMemo(
     () => [
-      {
-        children: <QueryButton />,
-        onClick: () => {},
-        disable: false,
-        tooltip: "搜索知识点",
-      },
       {
         children: (
           <ReloadOutlined style={{ color: !searchNodeId ? "#999" : "unset" }} />
@@ -136,7 +136,7 @@ const SuffixHeaderButtons = () => {
         onClick: () => {
           toggleModal();
         },
-        disable: !graphName || searchNodeId,
+        disable: !graphName || !!searchNodeId,
         tooltip: "新增节点",
       },
       {
@@ -305,20 +305,40 @@ const SuffixHeaderButtons = () => {
           </Form.Item>
         </Form>
       </Modal>
-      <Space size={"middle"}>
-        {btns.map((btn, index) => (
-          <span
-            key={index}
-            className={styles.buttonOutline}
-            style={{
-              cursor: btn.disable ? "not-allowed" : "pointer",
-            }}
-            onClick={btn.disable ? undefined : btn.onClick}
-          >
-            <Tooltip title={btn.tooltip}>{btn.children}</Tooltip>
-          </span>
-        ))}
-      </Space>
+      {isEnoughWidth ? (
+        <Space size={"middle"}>
+          {btns.map((btn, index) => (
+            <span
+              key={index}
+              className={styles.buttonOutline}
+              style={{
+                cursor: btn.disable ? "not-allowed" : "pointer",
+              }}
+              onClick={btn.disable ? undefined : btn.onClick}
+            >
+              <Tooltip title={btn.tooltip}>{btn.children}</Tooltip>
+            </span>
+          ))}
+        </Space>
+      ) : (
+        <Dropdown
+          menu={{
+            items: btns.map((btn, index) => ({
+              title: btn.tooltip,
+              label: btn.tooltip,
+              icon: btn.children,
+              key: index,
+              disabled: btn.disable,
+              onClick: btn.onClick,
+            })),
+          }}
+        >
+          <div>
+            <GlobalOutlined />
+            操作图谱
+          </div>
+        </Dropdown>
+      )}
     </div>
   );
 };

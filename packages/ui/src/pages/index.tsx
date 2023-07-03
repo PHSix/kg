@@ -1,10 +1,5 @@
 import { Modal, notification, Spin, Form, Input } from "antd";
-import {
-  forwardRef,
-  useImperativeHandle,
-  useRef,
-  useState,
-} from "react";
+import { forwardRef, useImperativeHandle, useRef, useState } from "react";
 import { KBarProvider } from "kbar";
 
 import styles from "./index.module.scss";
@@ -19,10 +14,9 @@ import { EchartsGraph } from "./components/echarts-graph";
 
 export const IndexPage = () => {
   const barRef = useRef<{
-    setOnOpen: VoidFunction;
+    triggerOpen: VoidFunction;
   }>(null);
-  const { graphName, isPulling } =
-    graphStore;
+  const { graphName, isPulling } = graphStore;
 
   const warpperRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<InputPromptRef>(null);
@@ -33,7 +27,7 @@ export const IndexPage = () => {
       options={{
         callbacks: {
           onOpen: () => {
-            barRef.current?.setOnOpen();
+            barRef.current?.triggerOpen();
           },
         },
       }}
@@ -41,6 +35,9 @@ export const IndexPage = () => {
       <main className={styles.indexContainer}>
         <AttributeWindow />
         <GraphSelector />
+
+        {/* main viewport header component. 
+        Include grpah name show, search bar, suffix action buttons */}
         <section className={styles.viewContainer}>
           <div className={styles.searchHeader}>
             <span className={styles.graphName}>
@@ -58,23 +55,14 @@ export const IndexPage = () => {
           ) : (
             <div className={styles.forceWrapper} ref={warpperRef}>
               <EchartsGraph inputRef={inputRef} />
-              {/* <Force */}
-              {/*   option={{ */}
-              {/*     width: forceSize.width, */}
-              {/*     height: forceSize.height, */}
-              {/*   }} */}
-              {/*   data={data} */}
-              {/*   nodeStateStyles={NODE_STATE_STYLES as any} */}
-              {/*   lockedNode={lockedNode ?? undefined} */}
-              {/*   linkStateStyles={LINK_STATE_STYLES} */}
-              {/*   {...forceBehaviors} */}
-              {/* /> */}
             </div>
           )}
         </section>
       </main>
       <SettingDrawer />
       <UpdateWindow />
+      {/* a global modal window for create a new link for `Force` component, 
+      use ref to trigger component show */}
       <InputPrompt ref={inputRef} />
     </KBarProvider>
   );
@@ -99,7 +87,7 @@ type InputPromptRef = {
   getInputName: () => Promise<unknown>;
 };
 
-const InputPrompt = forwardRef<InputPromptRef, {}>(({ }, ref) => {
+const InputPrompt = forwardRef<InputPromptRef, {}>(({}, ref) => {
   const [open, setOpen] = useState(false);
   const promiseRef = useRef(initialPromise());
   const [form] = Form.useForm();
@@ -156,4 +144,3 @@ const InputPrompt = forwardRef<InputPromptRef, {}>(({ }, ref) => {
     </Modal>
   );
 });
-

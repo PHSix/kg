@@ -1,5 +1,5 @@
 .searchButton {
-  width: 300px;
+  // width: 300px;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -13,30 +13,41 @@
 
 .selectorContainer {
   position: absolute;
-  right: calc(-300px + 30px);
+  // right: -5px;
+  // right: calc(-300px + 30px);
   height: 80vh;
   width: 300px;
   top: 10vh;
   transition-property: all;
   transition-duration: 300ms;
-  border-radius: 8px;
-  box-shadow: 0 0 4px #aaa;
-  z-index: 1000;
-  background-color: #fff;
-  padding: 10px 13px;
-  line-height: 30px;
-  .domainTag {
-    font-size: 14px;
-    cursor: pointer;
+  display: flex;
+  .selectorWrapper {
+    box-sizing: border-box;
+    height: 100%;
+    width: 293px;
+    // margin-right: 7px;
+    // padding-right: 7px;
+    // width: calc(100% - 7px);
+    border-radius: 8px;
+    box-shadow: 0 0 4px #aaa;
+    z-index: 1000;
+    background-color: #fff;
+    padding: 10px 13px;
+    line-height: 30px;
+    .domainTag {
+      font-size: 14px;
+      cursor: pointer;
+    }
+
+    .plusButton {
+      display: block;
+      width: 100%;
+    }
   }
 
-  .plusButton {
-    display: block;
-    width: 100%;
+  &:hover {
+    right: 0;
   }
-}
-.selectorContainer:hover {
-  right: 7px;
 }
 
 .kbarAnimator {

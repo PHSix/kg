@@ -1,7 +1,7 @@
 import { Button, Spin } from "antd";
 import { SearchOutlined } from "@ant-design/icons";
 import { forwardRef, useImperativeHandle } from "react";
-import { useRequest } from "ahooks";
+import { useRequest, useSize } from "ahooks";
 import {
   KBarPortal,
   KBarAnimator,
@@ -19,12 +19,13 @@ import request from "../../utils/request";
 import { useActions } from "./useActions";
 
 export const SearchBar = forwardRef<{
-  setOnOpen: () => void;
+  triggerOpen: () => void;
 }>((_, ref) => {
   const { query } = useKBar(() => ({}));
 
   const { graphName, pollGraph } = graphStore;
 
+  // define a voidfunction, use for callback in somewhere.
   let wrapper = {
     clear: () => {},
   };
@@ -77,16 +78,20 @@ export const SearchBar = forwardRef<{
     }
   );
   useImperativeHandle(ref, () => ({
-    setOnOpen: () => {
+    triggerOpen: () => {
       refresh();
     },
   }));
   wrapper.clear = useActions(loading ? [] : _actions || [], [_actions]).current;
+  // adapta different browser window size
+  const size = useSize(document.body);
+  const isEnoughWidth = !(size?.width && size.width < 550);
 
   return (
     <>
       <Button
         className={styles.searchButton}
+        style={{ width: isEnoughWidth ? "300px" : "unset" }}
         onClick={() => {
           query.toggle();
           refresh();
@@ -94,14 +99,14 @@ export const SearchBar = forwardRef<{
         disabled={!graphName}
       >
         <SearchOutlined />
-        按下 `cmd + k` 开始搜索图谱节点
+        {isEnoughWidth && "按下 `cmd + k` 开始搜索图谱节点"}
         {/* Press `cmd + k` to start search node */}
       </Button>
       <KBarPortal>
         <KBarPositioner
           style={{
             zIndex: 1000,
-            background: "#00000090"
+            background: "#00000090",
           }}
         >
           <KBarAnimator className={styles.kbarAnimator}>
